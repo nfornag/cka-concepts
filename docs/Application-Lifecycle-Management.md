@@ -1,6 +1,6 @@
 ## Application Lifecycle Management 8%
 
-### Deploying an Application, Rolling Updates, and Rollbacks 
+### 1. Deploying an Application, Rolling Updates, and Rollbacks 
 
 We already know Kubernetes will run pods and deployments, but what happens when you need to update or change the version of your application running inside of the Kubernetes cluster? That’s where rolling updates come in, allowing you to update the app image with zero downtime. In this lesson, we’ll go over a rolling update, how to roll back, and how to pause the update if things aren’t going well.
 
@@ -126,7 +126,7 @@ Performing a Rolling Update https://kubernetes.io/docs/tutorials/kubernetes-basi
 
 
 
-### Configuring an Application for High Availability and Scale 
+### 2. Configuring an Application for High Availability and Scale 
 
 Continuing from the last lesson, we will go through how Kubernetes will save you from EVER releasing code with bugs. Then, we will talk about ConfigMaps and secrets as a way to pass configuration data to your apps.
 
@@ -335,7 +335,7 @@ Scaling Your Application https://kubernetes.io/docs/concepts/cluster-administrat
 Configure Pod ConfigMaps https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
 Secrets https://kubernetes.io/docs/concepts/configuration/secret/
 
-### Creating a Self-Healing Application 
+### 3. Creating a Self-Healing Application 
 
 In this lesson, we’ll go through the power of ReplicaSets, which make your application self-healing by replicating pods and moving them around and spinning them up when nodes fail. We’ll also talk about StatefulSets and the benefit they provide.
 
