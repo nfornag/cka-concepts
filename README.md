@@ -1,4 +1,4 @@
-## Kubectl Commands
+## Kubernetes CKA
 
 1. Application Lifecycle Management 8%
 2. Installation, Configuration & Validation 12%
