@@ -1,5 +1,17 @@
 ## Kubectl Commands
 
+1. Application Lifecycle Management 8%
+2. Installation, Configuration & Validation 12%
+3. Core Concepts 19%
+4. Networking 11%
+5. Scheduling 5%
+6. Security 12%
+7. Cluster Maintenance 11%
+8. Logging / Monitoring 5%
+9. Storage 7%
+10. Troubleshooting 10%
+
+
 ```bash
 kubectl get pods --all-namespaces --show-labels -o wide
 ```
@@ -38,62 +50,62 @@ kubectl expose deployment hr-web-app --type=NodePort --port=8080 --name=hr-web-a
 
 ## Installation, Configuration & Validation 12%
 
-#### Get the Docker gpg key:
+##### Get the Docker gpg key:
 
 ```bash
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 ```
 
-#### Add the Docker repository:
+##### Add the Docker repository:
 
 ```bash
 sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
 ```
-#### Get the Kubernetes gpg key:
+##### Get the Kubernetes gpg key:
 
 ```bash
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 ```
-#### Add the Kubernetes repository:
+##### Add the Kubernetes repository:
 
 ```bash
 cat << EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 ```
-#### Update your packages:
+##### Update your packages:
 
 ```bash
 sudo apt-get update
 ```
-#### Install Docker, kubelet, kubeadm, and kubectl:
+##### Install Docker, kubelet, kubeadm, and kubectl:
 
 ```bash
 sudo apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu kubelet=1.13.5-00 kubeadm=1.13.5-00 kubectl=1.13.5-00
 ```
-#### Hold them at the current version:
+##### Hold them at the current version:
 
 ```bash
 sudo apt-mark hold docker-ce kubelet kubeadm kubectl
 ```
-#### Add the iptables rule to sysctl.conf:
+##### Add the iptables rule to sysctl.conf:
 
 ```bash
 echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
 ```
-#### Enable iptables immediately:
+##### Enable iptables immediately:
 
 ```bash
 sudo sysctl -p
 ```
-#### Initialize the cluster (run only on the master):
+##### Initialize the cluster (run only on the master):
 
 ```bash
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
-#### Set up local kubeconfig:
+##### Set up local kubeconfig:
 
 ```bash
 mkdir -p $HOME/.kube
@@ -102,17 +114,17 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
-#### Apply Flannel CNI network overlay:
+##### Apply Flannel CNI network overlay:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
 ```
-#### Join the worker nodes to the cluster:
+##### Join the worker nodes to the cluster:
 
 ```bash
 kubeadm join [your unique string from the kubeadm init command]
 ```
-#### Verify the worker nodes have joined the cluster successfully:
+##### Verify the worker nodes have joined the cluster successfully:
 
 ```bash
 kubectl get nodes
@@ -127,169 +139,169 @@ chadcrowell3c.mylabserver.com   Ready    none     69s   v1.13.5
 ```
 ## Cluster Maintenance 11%
 
-#### kubeadm allows us to upgrade our cluster components in the proper order, making sure to include important feature upgrades we might want to take advantage of in the latest stable version of Kubernertes. In this lesson, we will go through upgrading our cluster from version 1.13.5 to 1.14.1.
+##### kubeadm allows us to upgrade our cluster components in the proper order, making sure to include important feature upgrades we might want to take advantage of in the latest stable version of Kubernertes. In this lesson, we will go through upgrading our cluster from version 1.13.5 to 1.14.1.
 
-#### Get the version of the API server:
+##### Get the version of the API server:
 
 ```bash
 kubectl version --short
 ```
-#### View the version of kubelet:
+##### View the version of kubelet:
 
 ```bash
 kubectl describe nodes 
 ```
-#### View the version of controller-manager pod:
+##### View the version of controller-manager pod:
 
 ```bash
 kubectl get po [controller_pod_name] -o yaml -n kube-system
 ```
-#### Release the hold on versions of kubeadm and kubelet:
+##### Release the hold on versions of kubeadm and kubelet:
 
 ```bash
 sudo apt-mark unhold kubeadm kubelet
 ```
-#### Install version 1.14.1 of kubeadm:
+##### Install version 1.14.1 of kubeadm:
 
 ```bash
 sudo apt install -y kubeadm=1.14.1-00
 ```
-#### Hold the version of kubeadm at 1.14.1:
+##### Hold the version of kubeadm at 1.14.1:
 
 ```bash
 sudo apt-mark hold kubeadm
-#### Verify the version of kubeadm:
+##### Verify the version of kubeadm:
 ```
 ```bash
 kubeadm version
 ```
-#### Plan the upgrade of all the controller components:
+##### Plan the upgrade of all the controller components:
 
 ```bash
 sudo kubeadm upgrade plan
 ```
-#### Upgrade the controller components:
+##### Upgrade the controller components:
 
 ```bash
 sudo kubeadm upgrade apply v1.14.1
 ```
-#### Release the hold on the version of kubectl:
+##### Release the hold on the version of kubectl:
 
 ```bash
 sudo apt-mark unhold kubectl
 ```
-#### Upgrade kubectl:
+##### Upgrade kubectl:
 
 ```bash
 sudo apt install -y kubectl=1.14.1-00
 ```
-#### Hold the version of kubectl at 1.14.1:
+##### Hold the version of kubectl at 1.14.1:
 
 ```bash
 sudo apt-mark hold kubectl
 ```
-#### Upgrade the version of kubelet:
+##### Upgrade the version of kubelet:
 
 ```bash
 sudo apt install -y kubelet=1.14.1-00
 ```
-#### Hold the version of kubelet at 1.14.1:
+##### Hold the version of kubelet at 1.14.1:
 
 ```bash
 sudo apt-mark hold kubelet
 ```
 
-############ OS Upgrade ############ 
+### OS Upgrade 
 
 
-#### When we need to take a node down for maintenance, Kubernetes makes it easy to evict the pods on that node, take it down, and then continue scheduling pods after the maintenance is complete. Furthermore, if the node needs to be decommissioned, you can just as easily remove the node and replace it with a new one, joining it to the cluster.
+##### When we need to take a node down for maintenance, Kubernetes makes it easy to evict the pods on that node, take it down, and then continue scheduling pods after the maintenance is complete. Furthermore, if the node needs to be decommissioned, you can just as easily remove the node and replace it with a new one, joining it to the cluster.
 
-####  See which pods are running on which nodes:
+#####  See which pods are running on which nodes:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Evict the pods on a node:
+##### Evict the pods on a node:
 
 ```bash
 kubectl drain [node_name] --ignore-daemonsets
 ```
-#### Watch as the node changes status:
+##### Watch as the node changes status:
 
 ```bash
 kubectl get nodes -w
 ```
-#### Schedule pods to the node after maintenance is complete:
+##### Schedule pods to the node after maintenance is complete:
 
 ```bash
 kubectl uncordon [node_name]
 ```
-#### Remove a node from the cluster:
+##### Remove a node from the cluster:
 
 ```bash
 kubectl delete node [node_name]
 ```
-#### Generate a new token:
+##### Generate a new token:
 
 ```bash
 sudo kubeadm token generate
 ```
-#### List the tokens:
+##### List the tokens:
 
 ```bash
 sudo kubeadm token list
 ```
-#### Print the kubeadm join command to join a node to the cluster:
+##### Print the kubeadm join command to join a node to the cluster:
 
 ```bash
 sudo kubeadm token create [token_name] --ttl 2h --print-join-command
 ```
 
-############ Backup ETCD ############ 
+### Backup ETCD 
 
-#### Backing up your cluster can be a useful exercise, especially if you have a single etcd cluster, as all the cluster state is stored there. The etcdctl utility allows us to easily create a snapshot of our cluster state (etcd) and save this to an external location. In this lesson, we’ll go through creating the snapshot and talk about restoring in the event of failure.
+##### Backing up your cluster can be a useful exercise, especially if you have a single etcd cluster, as all the cluster state is stored there. The etcdctl utility allows us to easily create a snapshot of our cluster state (etcd) and save this to an external location. In this lesson, we’ll go through creating the snapshot and talk about restoring in the event of failure.
 
-#### Get the etcd binaries:
+##### Get the etcd binaries:
 
 ```bash
 wget https://github.com/etcd-io/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
 ```
-#### Unzip the compressed binaries:
+##### Unzip the compressed binaries:
 
 ```bash
 tar xvf etcd-v3.3.12-linux-amd64.tar.gz
 ```
-#### Move the files into /usr/local/bin:
+##### Move the files into /usr/local/bin:
 
 ```bash
 sudo mv etcd-v3.3.12-linux-amd64/etcd* /usr/local/bin
 ```
-#### Take a snapshot of the etcd datastore using etcdctl:
+##### Take a snapshot of the etcd datastore using etcdctl:
 
 ```bash
 sudo ETCDCTL_API=3 etcdctl snapshot save snapshot.db --cacert /etc/kubernetes/pki/etcd/server.crt --cert /etc/kubernetes/pki/etcd/ca.crt --key /etc/kubernetes/pki/etcd/ca.key
 ```
-#### View the help page for etcdctl:
+##### View the help page for etcdctl:
 
 ```bash
 ETCDCTL_API=3 etcdctl --help
 ```
-#### Browse to the folder that contains the certificate files:
+##### Browse to the folder that contains the certificate files:
 
 ```bash
 cd /etc/kubernetes/pki/etcd/
 ```
-#### View that the snapshot was successful:
+##### View that the snapshot was successful:
 
 ```bash
 ETCDCTL_API=3 etcdctl --write-out=table snapshot status snapshot.db
 ```
-#### Zip up the contents of the etcd directory:
+##### Zip up the contents of the etcd directory:
 
 ```bash
 sudo tar -zcvf etcd.tar.gz etcd
 ```
-#### Copy the etcd directory to another server:
+##### Copy the etcd directory to another server:
 
 ```bash
 scp etcd.tar.gz cloud_user@18.219.235.42:~/
@@ -304,32 +316,32 @@ https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/recovery.md
 
 Kubernetes keeps networking simple for effective communication between pods, even if they are located on a different node. In this lesson, we’ll talk about pod communication from within a node, including how to inspect the virtual interfaces, and then get into what happens when a pod wants to talk to another pod on a different node.
 
-#### See which node our pod is on:
+##### See which node our pod is on:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Log in to the node:
+##### Log in to the node:
 
 ```bash
 ssh [node_name]
 ```
-#### View the node's virtual network interfaces:
+##### View the node's virtual network interfaces:
 
 ```bash
 ifconfig
 ```
-#### View the containers in the pod:
+##### View the containers in the pod:
 
 ```bash
 docker ps
 ```
-#### Get the process ID for the container:
+##### Get the process ID for the container:
 
 ```bash
 docker inspect --format '{{ .State.Pid }}' [container_id]
 ```
-#### Use nsenter to run a command in the process's network namespace:
+##### Use nsenter to run a command in the process's network namespace:
 
 ```bash
 nsenter -t [container_pid] -n ip addr
@@ -339,7 +351,7 @@ https://kubernetes.io/docs/concepts/cluster-administration/networking/
 
 A Container Network Interface (CNI) is an easy way to ease communication between containers in a cluster. The CNI has many responsibilities, including IP management, encapsulating packets, and mappings in userspace. In this lesson, we will cover the details of the Flannel CNI we used in our Linux Academy cluster and talk about the ways in which we simplified communication in our cluster.
 
-#### Apply the Flannel CNI plugin:
+##### Apply the Flannel CNI plugin:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
@@ -355,12 +367,12 @@ https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-clu
 https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
 
-################## Service Networking
+######### Service Networking
 
 
 Services allow our pods to move around, get deleted, and replicate, all without having to manually keep track of their IP addresses in the cluster. This is accomplished by creating one gateway to distribute packets evenly across all pods. In this lesson, we will see the differences between a NodePort service and a ClusterIP service and see how the iptables rules take effect when traffic is coming in.
 
-#### YAML for the nginx NodePort service:
+##### YAML for the nginx NodePort service:
 
 ```bash
 apiVersion: v1
@@ -377,27 +389,27 @@ spec:
   selector:
     app: nginx
 ```
-#### Get the services YAML output for all the services in your cluster:
+##### Get the services YAML output for all the services in your cluster:
 
 ```bash
 kubectl get services -o yaml
 ```
-#### Try and ping the clusterIP service IP address:
+##### Try and ping the clusterIP service IP address:
 
 ```bash
 ping 10.96.0.1
 ```
-#### View the list of services in your cluster:
+##### View the list of services in your cluster:
 
 ```bash
 kubectl get services
 ```
-#### View the list of endpoints in your cluster that get created with a service:
+##### View the list of endpoints in your cluster that get created with a service:
 
 ```bash
 kubectl get endpoints
 ```
-#### Look at the iptables rules for your services:
+##### Look at the iptables rules for your services:
 
 ```bash
 sudo iptables-save | grep KUBE | grep nginx
@@ -405,17 +417,17 @@ sudo iptables-save | grep KUBE | grep nginx
 
 https://kubernetes.io/docs/concepts/services-networking/service/
 
-############ Ingress Rules and Load Balancers ############ 
+### Ingress Rules and Load Balancers 
 
 
 When handling traffic from outside sources, there are two ways to direct that traffic to your pods: deploying a load balancer, and creating an ingress controller and an Ingress resource. In this lesson, we will talk about the benefits of each and how Kubernetes distributes traffic to the pods on a node to reduce latency and direct traffic to the appropriate services within your cluster.
 
-#### View the list of services:
+##### View the list of services:
 
 ```bash
 kubectl get services
 ```
-#### The load balancer YAML spec:
+##### The load balancer YAML spec:
 
 ```bash
 apiVersion: v1
@@ -430,62 +442,62 @@ spec:
   selector:
     app: nginx
 ```
-#### Create a new deployment:
+##### Create a new deployment:
 
 ```bash
 kubectl run kubeserve2 --image=chadmcrowell/kubeserve2
 ```
-#### View the list of deployments:
+##### View the list of deployments:
 
 ```bash
 kubectl get deployments
 ```
-#### Scale the deployments to 2 replicas:
+##### Scale the deployments to 2 replicas:
 
 ```bash
 kubectl scale deployment/kubeserve2 --replicas=2
 ```
-#### View which pods are on which nodes:
+##### View which pods are on which nodes:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Create a load balancer from a deployment:
+##### Create a load balancer from a deployment:
 
 ```bash
 kubectl expose deployment kubeserve2 --port 80 --target-port 8080 --type LoadBalancer
 ```
-#### View the services in your cluster:
+##### View the services in your cluster:
 
 ```bash
 kubectl get services
 ```
-#### Watch as an external port is created for a service:
+##### Watch as an external port is created for a service:
 
 ```bash
 kubectl get services -w
 ```
-#### Look at the YAML for a service:
+##### Look at the YAML for a service:
 
 ```bash
 kubectl get services kubeserve2 -o yaml
 ```
-#### Curl the external IP of the load balancer:
+##### Curl the external IP of the load balancer:
 
 ```bash
 curl http://[external-ip]
 ```
-#### View the annotation associated with a service:
+##### View the annotation associated with a service:
 
 ```bash
 kubectl describe services kubeserve
 ```
-#### Set the annotation to route load balancer traffic local to the node:
+##### Set the annotation to route load balancer traffic local to the node:
 
 ```bash
 kubectl annotate service kubeserve2 externalTrafficPolicy=Local
 ```
-#### The YAML for an Ingress resource:
+##### The YAML for an Ingress resource:
 
 ```bash
 apiVersion: extensions/v1beta1
@@ -512,17 +524,17 @@ spec:
           serviceName: httpd
           servicePort: 80
 ```
-#### Edit the ingress rules:
+##### Edit the ingress rules:
 
 ```bash
 kubectl edit ingress
 ```
-#### View the existing ingress rules:
+##### View the existing ingress rules:
 
 ```bash
 kubectl describe ingress
 ```
-#### Curl the hostname of your Ingress resource:
+##### Curl the hostname of your Ingress resource:
 
 ```bash
 curl http://kubeserve2.example.com
@@ -535,26 +547,26 @@ Ingress
 https://kubernetes.io/docs/concepts/services-networking/ingress/
 
 
-############ Cluster DNS ############ 
+### Cluster DNS 
 
 CoreDNS is now the new default DNS plugin for Kubernetes. In this lesson, we’ll go over the hostnames for pods and services. We will also discover how you can customize DNS to include your own nameservers.
 
-#### View the CoreDNS pods in the kube-system namespace:
+##### View the CoreDNS pods in the kube-system namespace:
 
 ```bash
 kubectl get pods -n kube-system
 ```
-#### View the CoreDNS deployment in your Kubernetes cluster:
+##### View the CoreDNS deployment in your Kubernetes cluster:
 
 ```bash
 kubectl get deployments -n kube-system
 ```
-#### View the service that performs load balancing for the DNS server:
+##### View the service that performs load balancing for the DNS server:
 
 ```bash
 kubectl get services -n kube-system
 ```
-#### Spec for the busybox pod:
+##### Spec for the busybox pod:
 
 ```bash
 apiVersion: v1
@@ -572,32 +584,32 @@ spec:
     name: busybox
   restartPolicy: Always
 ```
-#### View the resolv.conf file that contains the nameserver and search in DNS:
+##### View the resolv.conf file that contains the nameserver and search in DNS:
 
 ```bash
 kubectl exec -it busybox -- cat /etc/resolv.conf
 ```
-#### Look up the DNS name for the native Kubernetes service:
+##### Look up the DNS name for the native Kubernetes service:
 
 ```bash
 kubectl exec -it busybox -- nslookup kubernetes
 ```
-#### Look up the DNS names of your pods:
+##### Look up the DNS names of your pods:
 
 ```bash
 kubectl exec -ti busybox -- nslookup [pod-ip-address].default.pod.cluster.local
 ```
-#### Look up a service in your Kubernetes cluster:
+##### Look up a service in your Kubernetes cluster:
 
 ```bash
 kubectl exec -it busybox -- nslookup kube-dns.kube-system.svc.cluster.local
 ```
-#### Get the logs of your CoreDNS pods:
+##### Get the logs of your CoreDNS pods:
 
 ```bash
 kubectl logs [coredns-pod-name]
 ```
-#### YAML spec for a headless service:
+##### YAML spec for a headless service:
 
 ```bash
 apiVersion: v1
@@ -612,7 +624,7 @@ spec:
   selector:
     app: kubserve2
 ```
-#### YAML spec for a custom DNS pod:
+##### YAML spec for a custom DNS pod:
 
 ```bash
 apiVersion: v1
@@ -651,17 +663,17 @@ Deploying CoreDNS using kubeadm https://coredns.io/2018/01/29/deploying-kubernet
 
 The default scheduler in Kubernetes attempts to find the best node for your pod by going through a series of steps. In this lesson, we will cover the steps in detail in order to better understand the scheduler’s function when placing pods on nodes to maximize uptime for the applications running in your cluster. We will also go through how to create a deployment with node affinity.
 
-#### Label your node as being located in availability zone 1:
+##### Label your node as being located in availability zone 1:
 
 ```bash
 kubectl label node chadcrowell1c.mylabserver.com availability-zone=zone1
 ```
-#### Label your node as dedicated infrastructure:
+##### Label your node as dedicated infrastructure:
 
 ```bash
 kubectl label node chadcrowell1c.mylabserver.com share-type=dedicated
 ```
-#### Here is the YAML for the deployment to include the node affinity rules:
+##### Here is the YAML for the deployment to include the node affinity rules:
 
 ```bash
 apiVersion: extensions/v1beta1
@@ -699,17 +711,17 @@ spec:
         image: busybox
         name: main
 ```
-#### Create the deployment:
+##### Create the deployment:
 
 ```bash
 kubectl create -f pref-deployment.yaml
 ```
-#### View the deployment:
+##### View the deployment:
 
 ```bash
 kubectl get deployments
 ```
-#### View which pods landed on which nodes:
+##### View which pods landed on which nodes:
 
 ```bash
 kubectl get pods -o wide
@@ -719,11 +731,11 @@ Assigning a Pod to a Node https://kubernetes.io/docs/concepts/configuration/assi
 Pod and Node Affinity Rules https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 
 
-############ Running Multiple Schedulers for Multiple Pods ############ 
+### Running Multiple Schedulers for Multiple Pods 
 
 In Kubernetes, you can run multiple schedulers simultaneously. You can then use different schedulers to schedule different pods. You may, for example, want to set different rules for the scheduler to run all of your pods on one node. In this lesson, I will show you how to deploy a new scheduler alongside your default scheduler and then schedule three different pods using the two schedulers.
 
-#### ClusterRole.yaml
+##### ClusterRole.yaml
 
 ```bash
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -735,7 +747,7 @@ rules:
   resources: ["csinodes"]
   verbs: ["get", "watch", "list"]
 ```
-#### ClusterRoleBinding.yaml
+##### ClusterRoleBinding.yaml
 
 ```bash
 apiVersion: rbac.authorization.k8s.io/v1
@@ -751,7 +763,7 @@ roleRef:
   name: csinodes-admin
   apiGroup: rbac.authorization.k8s.io
 ```
-#### Role.yaml
+##### Role.yaml
 
 ```bash
 apiVersion: rbac.authorization.k8s.io/v1
@@ -770,7 +782,7 @@ rules:
   - watch
 ```
 
-#### RoleBinding.yaml
+##### RoleBinding.yaml
 
 ```bash
 apiVersion: rbac.authorization.k8s.io/v1
@@ -788,7 +800,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-#### Edit the existing kube-scheduler cluster role with kubectl edit clusterrole system:kube-scheduler and add the following:
+##### Edit the existing kube-scheduler cluster role with kubectl edit clusterrole system:kube-scheduler and add the following:
 
 ```bash
 - apiGroups:
@@ -886,19 +898,19 @@ spec:
       volumes: []
 ```
 
-#### Run the deployment for my-scheduler:
+##### Run the deployment for my-scheduler:
 
 ```bash
 kubectl create -f my-scheduler.yaml
 ```
 
-#### View your new scheduler in the kube-system namespace:
+##### View your new scheduler in the kube-system namespace:
 
 ```bash
 kubectl get pods -n kube-system
 ```
 
-#### pod1.yaml
+##### pod1.yaml
 
 ```bash
 apiVersion: v1
@@ -913,7 +925,7 @@ spec:
     image: k8s.gcr.io/pause:2.0
 ```
 
-#### pod2.yaml
+##### pod2.yaml
 
 ```bash
 apiVersion: v1
@@ -929,7 +941,7 @@ spec:
     image: k8s.gcr.io/pause:2.0
 ```
 
-#### pod3.yaml
+##### pod3.yaml
 
 ```bash
 apiVersion: v1
@@ -945,7 +957,7 @@ spec:
     image: k8s.gcr.io/pause:2.0
 ```
 
-#### View the pods as they are created:
+##### View the pods as they are created:
 
 ```bash
 kubectl get pods -o wide
@@ -955,17 +967,17 @@ Helpful Links
 Configure Multiple Schedulers https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
 
 
-############ Scheduling Pods with Resource Limits and Label Selectors ############ 
+### Scheduling Pods with Resource Limits and Label Selectors 
 
 In order to share the resources of your node properly, you can set resource limits and requests in Kubernetes. This allows you to reserve enough CPU and memory for your application while still maintaining system health. In this lesson, we will create some requests and limits in our pod YAML to show how it’s used by the node.
 
-#### View the capacity and the allocatable info from a node:
+##### View the capacity and the allocatable info from a node:
 
 ```bash
 kubectl describe nodes
 ```
 
-#### The pod YAML for a pod with requests:
+##### The pod YAML for a pod with requests:
 
 ```bash
 apiVersion: v1
@@ -985,19 +997,19 @@ spec:
         memory: 20Mi
 ```
 
-#### Create the requests pod:
+##### Create the requests pod:
 
 ```bash
 kubectl create -f resource-pod1.yaml
 ```
 
-#### View the pods and nodes they landed on:
+##### View the pods and nodes they landed on:
 
 ```bash
 kubectl get pods -o wide
 ```
 
-#### The YAML for a pod that has a large request:
+##### The YAML for a pod that has a large request:
 
 ```bash
 apiVersion: v1
@@ -1016,32 +1028,32 @@ spec:
         cpu: 1000m
         memory: 20Mi
 ```
-#### Create the pod with 1000 millicore request:
+##### Create the pod with 1000 millicore request:
 
 ```bash
 kubectl create -f resource-pod2.yaml
 ```
-#### See why the pod with a large request didn’t get scheduled:
+##### See why the pod with a large request didn’t get scheduled:
 
 ```bash
 kubectl describe resource-pod2
 ```
-#### Look at the total requests per node:
+##### Look at the total requests per node:
 
 ```bash
 kubectl describe nodes chadcrowell3c.mylabserver.com
 ```
-#### Delete the first pod to make room for the pod with a large request:
+##### Delete the first pod to make room for the pod with a large request:
 
 ```bash
 kubectl delete pods resource-pod1
 ```
-#### Watch as the first pod is terminated and the second pod is started:
+##### Watch as the first pod is terminated and the second pod is started:
 
 ```bash
 kubectl get pods -o wide -w
 ```
-#### The YAML for a pod that has limits:
+##### The YAML for a pod that has limits:
 
 ```bash
 apiVersion: v1
@@ -1058,12 +1070,12 @@ spec:
         cpu: 1
         memory: 20Mi
 ```
-#### Create a pod with limits:
+##### Create a pod with limits:
 
 ```bash
 kubectl create -f limited-pod.yaml
 ```
-#### Use the exec utility to use the top command:
+##### Use the exec utility to use the top command:
 
 ```bash
 kubectl exec -it limited-pod top
@@ -1073,26 +1085,26 @@ Configure Default CPU Requests and Limits https://kubernetes.io/docs/tasks/admin
 Configure Default Memory Requests and Limits https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/
 
 
-############ DaemonSets and Manually Scheduled Pods ############ 
+### DaemonSets and Manually Scheduled Pods 
 
 DaemonSets do not use a scheduler to deploy pods. In fact, there are currently DaemonSets in the Kubernetes cluster that we made. In this lesson, I will show you where to find those and how to create your own DaemonSet pods to deploy without the need for a scheduler.
 
-#### Find the DaemonSet pods that exist in your kubeadm cluster:
+##### Find the DaemonSet pods that exist in your kubeadm cluster:
 
 ```bash
 kubectl get pods -n kube-system -o wide
 ```
-#### Delete a DaemonSet pod and see what happens:
+##### Delete a DaemonSet pod and see what happens:
 
 ```bash
 kubectl delete pods [pod_name] -n kube-system
 ```
-#### Give the node a label to signify it has SSD:
+##### Give the node a label to signify it has SSD:
 
 ```bash
 kubectl label node[node_name] disk=ssd
 ```
-#### The YAML for a DaemonSet:
+##### The YAML for a DaemonSet:
 
 ```bash
 apiVersion: apps/v1beta2
@@ -1114,32 +1126,32 @@ spec:
       - name: main
         image: linuxacademycontent/ssd-monitor
 ```
-#### Create a DaemonSet from a YAML spec:
+##### Create a DaemonSet from a YAML spec:
 
 ```bash
 kubectl create -f ssd-monitor.yaml
 ```
-#### Label another node to specify it has SSD:
+##### Label another node to specify it has SSD:
 
 ```bash
 kubectl label node chadcrowell2c.mylabserver.com disk=ssd
 ```
-#### View the DaemonSet pods that have been deployed:
+##### View the DaemonSet pods that have been deployed:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Remove the label from a node and watch the DaemonSet pod terminate:
+##### Remove the label from a node and watch the DaemonSet pod terminate:
 
 ```bash
 kubectl label node chadcrowell3c.mylabserver.com disk-
 ```
-#### Change the label on a node to change it to spinning disk:
+##### Change the label on a node to change it to spinning disk:
 
 ```bash
 kubectl label node chadcrowell2c.mylabserver.com disk=hdd --overwrite
 ```
-#### Pick the label to choose for your DaemonSet:
+##### Pick the label to choose for your DaemonSet:
 
 ```bash
 kubectl get nodes chadcrowell3c.mylabserver.com --show-labels
@@ -1148,48 +1160,48 @@ Helpful Links
 DaemonSets: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
 
 
-############ Displaying Scheduler Events ############ 
+### Displaying Scheduler Events 
 
 
 There are multiple ways to view the events related to the scheduler. In this lesson, we’ll look at ways in which you can troubleshoot any problems with your scheduler or just find out more information.
 
-#### View the name of the scheduler pod:
+##### View the name of the scheduler pod:
 
 ```bash
 kubectl get pods -n kube-system
 ```
 
-#### Get the information about your scheduler pod events:
+##### Get the information about your scheduler pod events:
 
 ```bash
 kubectl describe pods [scheduler_pod_name] -n kube-system
 ```
-#### View the events in your default namespace:
+##### View the events in your default namespace:
 
 ```bash
 kubectl get events
 ```
-#### View the events in your kube-system namespace:
+##### View the events in your kube-system namespace:
 
 ```bash
 kubectl get events -n kube-system
 ```
-#### Delete all the pods in your default namespace:
+##### Delete all the pods in your default namespace:
 
 ```bash
 kubectl delete pods --all
 ```
-#### Watch events as they are appearing in real time:
+##### Watch events as they are appearing in real time:
 
 ```bash
 kubectl get events -w
 ```
-#### View the logs from the scheduler pod:
+##### View the logs from the scheduler pod:
 
 ```bash
 kubectl logs [kube_scheduler_pod_name] -n kube-system
 ```
-#### The location of a systemd service scheduler pod:
+##### The location of a systemd service scheduler pod:
 
 ```bash
 /var/log/kube-scheduler.log
@@ -1200,11 +1212,11 @@ Verify the Desired Scheduler: https://kubernetes.io/docs/tasks/administer-cluste
 
 ## Application Lifecycle Management 8%
 
-############ Deploying an Application, Rolling Updates, and Rollbacks ############ 
+### Deploying an Application, Rolling Updates, and Rollbacks 
 
 We already know Kubernetes will run pods and deployments, but what happens when you need to update or change the version of your application running inside of the Kubernetes cluster? That’s where rolling updates come in, allowing you to update the app image with zero downtime. In this lesson, we’ll go over a rolling update, how to roll back, and how to pause the update if things aren’t going well.
 
-#### The YAML for a deployment:
+##### The YAML for a deployment:
 
 ```bash
 apiVersion: apps/v1
@@ -1227,93 +1239,93 @@ spec:
         name: app
 ```
 
-#### Create a deployment with a record (for rollbacks):
+##### Create a deployment with a record (for rollbacks):
 
 ```bash
 kubectl create -f kubeserve-deployment.yaml --record
 ```
 
-#### Check the status of the rollout:
+##### Check the status of the rollout:
 
 ```bash
 kubectl rollout status deployments kubeserve
 
 ```
-#### View the ReplicaSets in your cluster:
+##### View the ReplicaSets in your cluster:
 
 ```bash
 kubectl get replicasets
 ```
-#### Scale up your deployment by adding more replicas:
+##### Scale up your deployment by adding more replicas:
 
 ```bash
 kubectl scale deployment kubeserve --replicas=5
 ```
-#### Expose the deployment and provide it a service:
+##### Expose the deployment and provide it a service:
 
 ```bash
 kubectl expose deployment kubeserve --port 80 --target-port 80 --type NodePort
 ```
-#### Set the minReadySeconds attribute to your deployment:
+##### Set the minReadySeconds attribute to your deployment:
 
 ```bash
 kubectl patch deployment kubeserve -p '{"spec": {"minReadySeconds": 10}}'
 ```
-#### Use kubectl apply to update a deployment:
+##### Use kubectl apply to update a deployment:
 
 ```bash
 kubectl apply -f kubeserve-deployment.yaml
 ```
-#### Use kubectl replace to replace an existing deployment:
+##### Use kubectl replace to replace an existing deployment:
 
 ```bash
 kubectl replace -f kubeserve-deployment.yaml
 ```
-#### Run this curl look while the update happens:
+##### Run this curl look while the update happens:
 
 ```bash
 while true; do curl http://10.105.31.119; done
 ```
-#### Perform the rolling update:
+##### Perform the rolling update:
 
 ```bash
 kubectl set image deployments/kubeserve app=linuxacademycontent/kubeserve:v2 --v 6
 ```
 
-#### Describe a certain ReplicaSet:
+##### Describe a certain ReplicaSet:
 
 ```bash
 kubectl describe replicasets kubeserve-[hash]
 ```
-#### Apply the rolling update to version 3 (buggy):
+##### Apply the rolling update to version 3 (buggy):
 
 ```bash
 kubectl set image deployment kubeserve app=linuxacademycontent/kubeserve:v3
 ```
-#### Undo the rollout and roll back to the previous version:
+##### Undo the rollout and roll back to the previous version:
 
 ```bash
 kubectl rollout undo deployments kubeserve
 ```
 ```bash
-#### Look at the rollout history:
+##### Look at the rollout history:
 
 ```bash
 kubectl rollout history deployment kubeserve
 ```
-#### Roll back to a certain revision:
+##### Roll back to a certain revision:
 
 ```bash
 kubectl rollout undo deployment kubeserve --to-revision=2
 ```
 
-#### Pause the rollout in the middle of a rolling update (canary release):
+##### Pause the rollout in the middle of a rolling update (canary release):
 
 
 ```bash
 kubectl rollout pause deployment kubeserve
 ```
-#### Resume the rollout after the rolling update looks good:
+##### Resume the rollout after the rolling update looks good:
 
 ```bash
 kubectl rollout resume deployment kubeserve
@@ -1326,11 +1338,11 @@ Performing a Rolling Update https://kubernetes.io/docs/tutorials/kubernetes-basi
 
 
 
-############ Configuring an Application for High Availability and Scale ############ 
+### Configuring an Application for High Availability and Scale 
 
 Continuing from the last lesson, we will go through how Kubernetes will save you from EVER releasing code with bugs. Then, we will talk about ConfigMaps and secrets as a way to pass configuration data to your apps.
 
-#### The YAML for a readiness probe:
+##### The YAML for a readiness probe:
 
 ```bash
 apiVersion: apps/v1
@@ -1364,32 +1376,32 @@ spec:
             port: 80
 
 ```
-#### Apply the readiness probe:
+##### Apply the readiness probe:
 
 ```bash
 kubectl apply -f kubeserve-deployment-readiness.yaml
 ```
-#### View the rollout status:
+##### View the rollout status:
 
 ```bash
 kubectl rollout status deployment kubeserve
 ```
-#### Describe deployment:
+##### Describe deployment:
 
 ```bash
 kubectl describe deployment
 ```
-#### Create a ConfigMap with two keys:
+##### Create a ConfigMap with two keys:
 
 ```bash
 kubectl create configmap appconfig --from-literal=key1=value1 --from-literal=key2=value2
 ```
-#### Get the YAML back out from the ConfigMap:
+##### Get the YAML back out from the ConfigMap:
 
 ```bash
 kubectl get configmap appconfig -o yaml
 ```
-#### The YAML for the ConfigMap pod:
+##### The YAML for the ConfigMap pod:
 
 ```bash
 apiVersion: v1
@@ -1408,17 +1420,17 @@ spec:
           name: appconfig
           key: key1
 ```
-#### Create the pod that is passing the ConfigMap data:
+##### Create the pod that is passing the ConfigMap data:
 
 ```bash
 kubectl apply -f configmap-pod.yaml
 ```
-#### Get the logs from the pod displaying the value:
+##### Get the logs from the pod displaying the value:
 
 ```bash
 kubectl logs configmap-pod
 ```
-#### The YAML for a pod that has a ConfigMap volume attached:
+##### The YAML for a pod that has a ConfigMap volume attached:
 
 ```bash
 apiVersion: v1
@@ -1439,22 +1451,22 @@ spec:
         name: appconfig
 ```
 
-#### Create the ConfigMap volume pod:
+##### Create the ConfigMap volume pod:
 
 ```bash
 kubectl apply -f configmap-volume-pod.yaml
 ```
-#### Get the keys from the volume on the container:
+##### Get the keys from the volume on the container:
 
 ```bash
 kubectl exec configmap-volume-pod -- ls /etc/config
 ```
-#### Get the values from the volume on the pod:
+##### Get the values from the volume on the pod:
 
 ```bash
 kubectl exec configmap-volume-pod -- cat /etc/config/key1
 ```
-#### The YAML for a secret:
+##### The YAML for a secret:
 
 ```bash
 apiVersion: v1
@@ -1465,12 +1477,12 @@ stringData:
   cert: value
   key: value
 ```
-#### Create the secret:
+##### Create the secret:
 
 ```bash
 kubectl apply -f appsecret.yaml
 ```
-#### The YAML for a pod that will use the secret:
+##### The YAML for a pod that will use the secret:
 
 ```bash
 apiVersion: v1
@@ -1489,18 +1501,18 @@ spec:
           name: appsecret
           key: cert
 ```
-#### Create the pod that has attached secret data:
+##### Create the pod that has attached secret data:
 
 ```bash
 kubectl apply -f secret-pod.yaml
 ```
-#### Open a shell and echo the environment variable:
+##### Open a shell and echo the environment variable:
 
 ```bash
 kubectl exec -it secret-pod -- sh
 echo $MY_CERT
 ```
-#### The YAML for a pod that will access the secret from a volume:
+##### The YAML for a pod that will access the secret from a volume:
 
 ```bash
 apiVersion: v1
@@ -1520,12 +1532,12 @@ spec:
       secret:
         secretName: appsecret
 ```
-#### Create the pod with volume attached with secrets:
+##### Create the pod with volume attached with secrets:
 
 ```bash
 kubectl apply -f secret-volume-pod.yaml
 ```
-#### Get the keys from the volume mounted to the container with the secrets:
+##### Get the keys from the volume mounted to the container with the secrets:
 
 ```bash
 kubectl exec secret-volume-pod -- ls /etc/certs
@@ -1535,11 +1547,11 @@ Scaling Your Application https://kubernetes.io/docs/concepts/cluster-administrat
 Configure Pod ConfigMaps https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
 Secrets https://kubernetes.io/docs/concepts/configuration/secret/
 
-############ Creating a Self-Healing Application ############ 
+### Creating a Self-Healing Application 
 
 In this lesson, we’ll go through the power of ReplicaSets, which make your application self-healing by replicating pods and moving them around and spinning them up when nodes fail. We’ll also talk about StatefulSets and the benefit they provide.
 
-#### The YAML for a ReplicaSet:
+##### The YAML for a ReplicaSet:
 
 ```bash
 apiVersion: apps/v1
@@ -1563,12 +1575,12 @@ spec:
       - name: main
         image: linuxacademycontent/kubeserve
 ```
-#### Create the ReplicaSet:
+##### Create the ReplicaSet:
 
 ```bash
 kubectl apply -f replicaset.yaml
 ```
-#### The YAML for a pod with the same label as a ReplicaSet:
+##### The YAML for a pod with the same label as a ReplicaSet:
 
 ```bash
 apiVersion: v1
@@ -1582,17 +1594,17 @@ spec:
   - name: main
     image: linuxacademycontent/kubeserve
 ```
-#### Create the pod with the same label:
+##### Create the pod with the same label:
 
 ```bash
 kubectl apply -f pod-replica.yaml
 ```
-#### Watch the pod get terminated:
+##### Watch the pod get terminated:
 
 ```bash
 kubectl get pods -w 
 ```
-#### The YAML for a StatefulSet:
+##### The YAML for a StatefulSet:
 
 ```bash
 apiVersion: apps/v1
@@ -1628,17 +1640,17 @@ spec:
         requests:
           storage: 1Gi
 ```
-#### Create the StatefulSet:
+##### Create the StatefulSet:
 
 ```bash
 kubectl apply -f statefulset.yaml
 ```
-#### View all StatefulSets in the cluster:
+##### View all StatefulSets in the cluster:
 
 ```bash
 kubectl get statefulsets
 ```
-#### Describe the StatefulSets:
+##### Describe the StatefulSets:
 
 ```bash
 kubectl describe statefulsets
@@ -1651,21 +1663,21 @@ StatefulSets
 
 ## Storage 7%
 
-############ Persistent Volumes ############ 
+### Persistent Volumes 
 
 In Kubernetes, pods are ephemeral. This creates a unique challenge with attaching storage directly to the filesystem of a container. Persistent Volumes are used to create an abstraction layer between the application and the underlying storage, making it easier for the storage to follow the pods as they are deleted, moved, and created within your Kubernetes cluster.
 
-#### In the Google Cloud Engine, find the region your cluster is in:
+##### In the Google Cloud Engine, find the region your cluster is in:
 
 ```bash
 gcloud container clusters list
 ```
-#### Using Google Cloud, create a persistent disk in the same region as your cluster:
+##### Using Google Cloud, create a persistent disk in the same region as your cluster:
 
 ```bash
 gcloud compute disks create --size=1GiB --zone=us-central1-a mongodb
 ```
-#### The YAML for a pod that will use persistent disk:
+##### The YAML for a pod that will use persistent disk:
 
 ```bash
 apiVersion: v1
@@ -1688,77 +1700,77 @@ spec:
     - containerPort: 27017
       protocol: TCP
 ```
-#### Create the pod with disk attached and mounted:
+##### Create the pod with disk attached and mounted:
 
 ```bash
 kubectl apply -f mongodb-pod.yaml
 ```
-#### See which node the pod landed on:
+##### See which node the pod landed on:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Connect to the mongodb shell:
+##### Connect to the mongodb shell:
 
 ```bash
 kubectl exec -it mongodb mongo
 ```
-#### Switch to the mystore database in the mongodb shell:
+##### Switch to the mystore database in the mongodb shell:
 
 ```bash
 use mystore
 ```
-#### Create a JSON document to insert into the database:
+##### Create a JSON document to insert into the database:
 
 ```bash
 db.foo.insert({name:'foo'})
 ```
-#### View the document you just created:
+##### View the document you just created:
 
 ```bash
 db.foo.find()
 ```
-#### Exit from the mongodb shell:
+##### Exit from the mongodb shell:
 
 ```bash
 exit
 ```
-#### Delete the pod:
+##### Delete the pod:
 
 ```bash
 kubectl delete pod mongodb
 ```
-#### Create a new pod with the same attached disk:
+##### Create a new pod with the same attached disk:
 
 ```bash
 kubectl apply -f mongodb-pod.yaml
 ```
-#### Check to see which node the pod landed on:
+##### Check to see which node the pod landed on:
 
 ```bash
 kubectl get pods -o wide
 ```
-#### Drain the node (if the pod is on the same node as before):
+##### Drain the node (if the pod is on the same node as before):
 
 ```bash
 kubectl drain [node_name] --ignore-daemonsets
 ```
-#### Once the pod is on a different node, access the mongodb shell again:
+##### Once the pod is on a different node, access the mongodb shell again:
 
 ```bash
 kubectl exec -it mongodb mongo
 ```
-#### Access the mystore database again:
+##### Access the mystore database again:
 
 ```bash
 use mystore
 ```
-#### Find the document you created from before:
+##### Find the document you created from before:
 
 ```bash
 db.foo.find()
 ```
-#### The YAML for a PersistentVolume object in Kubernetes:
+##### The YAML for a PersistentVolume object in Kubernetes:
 
 ```bash
 apiVersion: v1
@@ -1777,12 +1789,12 @@ spec:
     fsType: ext4
 ```
 
-#### Create the Persistent Volume resource:
+##### Create the Persistent Volume resource:
 
 ```bash
 kubectl apply -f mongodb-persistentvolume.yaml
 ```
-#### View our Persistent Volumes:
+##### View our Persistent Volumes:
 
 ```bash
 kubectl get persistentvolumes
@@ -1793,7 +1805,7 @@ Configure Persistent Volume Storage https://kubernetes.io/docs/tasks/configure-p
 
 
 
-############ Volume Access Modes ############ 
+### Volume Access Modes 
 
 
 Volume access modes are how you specify the access of a node to your Persistent Volume. There are three types of access modes: ReadWriteOnce, ReadOnlyMany, and ReadWriteMany. In this lesson, we will explain what each of these access modes means and two VERY IMPORTANT things to remember when using your Persistent Volumes with pods.
@@ -1816,7 +1828,7 @@ spec:
     pdName: mongodb
     fsType: ext4
 ```
-#### View the Persistent Volumes in your cluster:
+##### View the Persistent Volumes in your cluster:
 
 ```bash
 kubectl get pv
@@ -1825,11 +1837,11 @@ Helpful Links:
 Access Modes https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 
 
-############ Persistent Volume Claims ############ 
+### Persistent Volume Claims 
 
 Persistent Volume Claims (PVCs) are a way for an application developer to request storage for the application without having to know where the underlying storage is. The claim is then bound to the Persistent Volume (PV), and it will not be released until the PVC is deleted. In this lesson, we will go through creating a PVC and accessing storage within our persistent disk.
 
-#### The YAML for a PVC:
+##### The YAML for a PVC:
 
 ```bash
 apiVersion: v1
@@ -1844,22 +1856,22 @@ spec:
   - ReadWriteOnce
   storageClassName: ""
 ```
-#### Create a PVC:
+##### Create a PVC:
 
 ```bash
 kubectl apply -f mongodb-pvc.yaml
 ```
-#### View the PVC in the cluster:
+##### View the PVC in the cluster:
 
 ```bash
 kubectl get pvc
 ```
-#### View the PV to ensure it’s bound:
+##### View the PV to ensure it’s bound:
 
 ```bash
 kubectl get pv
 ```
-#### The YAML for a pod that uses a PVC:
+##### The YAML for a pod that uses a PVC:
 
 ```bash
 apiVersion: v1
@@ -1881,37 +1893,37 @@ spec:
     persistentVolumeClaim:
       claimName: mongodb-pvc
 ```
-#### Create the pod with the attached storage:
+##### Create the pod with the attached storage:
 
 ```bash
 kubectl apply -f mongo-pvc-pod.yaml
 ```
-#### Access the mogodb shell:
+##### Access the mogodb shell:
 
 ```bash
 kubectl exec -it mongodb mongo
 ```
-#### Find the JSON document created in previous lessons:
+##### Find the JSON document created in previous lessons:
 
 ```bash
 db.foo.find()
 ```
-#### Delete the mongodb pod:
+##### Delete the mongodb pod:
 
 ```bash
 kubectl delete pod mogodb
 ```
-#### Delete the mongodb-pvc PVC:
+##### Delete the mongodb-pvc PVC:
 
 ```bash
 kubectl delete pvc mongodb-pvc
 ```
-#### Check the status of the PV:
+##### Check the status of the PV:
 
 ```bash
 kubectl get pv
 ```
-#### The YAML for the PV to show its reclaim policy:
+##### The YAML for the PV to show its reclaim policy:
 
 ```bash
 apiVersion: v1
@@ -1934,48 +1946,48 @@ PersistentVolumeClaims https://kubernetes.io/docs/concepts/storage/persistent-vo
 Create a PersistentVolumeClaim https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#create-a-persistentvolumeclaim
 
 
-############ Storage Objects ############ 
+### Storage Objects 
 
 There’s an even easier way to provision storage in Kubernetes with StorageClass objects. Also, your storage is safe from data loss with the “Storage Object in Use Protection” feature, which ensures any pods using a Persistent Volume will not lose the data on the volume as long as it is actively mounted. We’ve been using Google Storage for this section, but there are many different volume types you can use in Kubernetes. In this lesson, we will talk about the hostPath volume and the empty directory volume type.
 
-#### See the PV protection on your volume:
+##### See the PV protection on your volume:
 
 ```bash
 kubectl describe pv mongodb-pv
 ```
-#### See the PVC protection for your claim:
+##### See the PVC protection for your claim:
 
 ```bash
 kubectl describe pvc mongodb-pvc
 ```
-#### Delete the PVC:
+##### Delete the PVC:
 
 ```bash
 kubectl delete pvc mongodb-pvc
 ```
-#### See that the PVC is terminated, but the volume is still attached to pod:
+##### See that the PVC is terminated, but the volume is still attached to pod:
 
 ```bash
 kubectl get pvc
 ```
-#### Try to access the data, even though we just deleted the PVC:
+##### Try to access the data, even though we just deleted the PVC:
 
 ```bash
 kubectl exec -it mongodb mongo
 use mystore
 db.foo.find()
 ```
-#### Delete the pod, which finally deletes the PVC:
+##### Delete the pod, which finally deletes the PVC:
 
 ```bash
 kubectl delete pods mongodb
 ```
-#### Show that the PVC is deleted:
+##### Show that the PVC is deleted:
 
 ```bash
 kubectl get pvc
 ```
-#### YAML for a StorageClass object:
+##### YAML for a StorageClass object:
 
 ```bash
 apiVersion: storage.k8s.io/v1
@@ -1986,12 +1998,12 @@ provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd
 ```
-#### Create the StorageClass type "fast":
+##### Create the StorageClass type "fast":
 
 ```bash
 kubectl apply -f sc-fast.yaml
 ```
-#### Change the PVC to include the new StorageClass object:
+##### Change the PVC to include the new StorageClass object:
 
 ```bash
 apiVersion: v1
@@ -2006,22 +2018,22 @@ spec:
   accessModes:
     - ReadWriteOnce
 ```
-#### Create the PVC with automatically provisioned storage:
+##### Create the PVC with automatically provisioned storage:
 
 ```bash
 kubectl apply -f mongodb-pvc.yaml
 ```
-#### View the PVC with new StorageClass:
+##### View the PVC with new StorageClass:
 
 ```bash
 kubectl get pvc
 ```
-#### View the newly provisioned storage:
+##### View the newly provisioned storage:
 
 ```bash
 kubectl get pv
 ```
-#### The YAML for a hostPath PV:
+##### The YAML for a hostPath PV:
 
 ```bash
 apiVersion: v1
@@ -2037,7 +2049,7 @@ spec:
   hostPath:
     path: "/mnt/data"
 ```
-#### The YAML for a pod with an empty directory volume:
+##### The YAML for a pod with an empty directory volume:
 
 ```bash
 apiVersion: v1
@@ -2060,11 +2072,11 @@ Helpful Links:
 Object in Use Protection https://kubernetes.io/docs/concepts/storage/persistent-volumes/#storage-object-in-use-protection
 Volumes https://kubernetes.io/docs/concepts/storage/volumes/
 
-############ Applications with Persistent Storage ############ 
+### Applications with Persistent Storage 
 
 In this lesson, we’ll wrap everything up in a nice little bow and create a deployment that will allow us to use our storage with our pods. This is to demonstrate how a real-world application would be deployed and used for storing data.
 
-#### The YAML for our StorageClass object:
+##### The YAML for our StorageClass object:
 
 ```bash
 apiVersion: storage.k8s.io/v1
@@ -2075,7 +2087,7 @@ provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd
 ```
-#### The YAML for our PVC:
+##### The YAML for our PVC:
 
 ```bash
 apiVersion: v1
@@ -2090,32 +2102,32 @@ spec:
   accessModes:
     - ReadWriteOnce
 ```
-#### Create our StorageClass object:
+##### Create our StorageClass object:
 
 ```bash
 kubectl apply -f storageclass-fast.yaml
 ```
-#### View the StorageClass objects in your cluster:
+##### View the StorageClass objects in your cluster:
 
 ```bash
 kubectl get sc
 ```
-#### Create our PVC:
+##### Create our PVC:
 
 ```bash
 kubectl apply -f kubeserve-pvc.yaml
 ```
-#### View the PVC created in our cluster:
+##### View the PVC created in our cluster:
 
 ```bash
 kubectl get pvc
 ```
-#### View our automatically provisioned PV:
+##### View our automatically provisioned PV:
 
 ```bash
 kubectl get pv
 ```
-#### The YAML for our deployment:
+##### The YAML for our deployment:
 
 ```bash
 apiVersion: apps/v1
@@ -2147,27 +2159,27 @@ spec:
         persistentVolumeClaim:
           claimName: kubeserve-pvc
 ```
-#### Create our deployment and attach the storage to the pods:
+##### Create our deployment and attach the storage to the pods:
 
 ```bash
 kubectl apply -f kubeserve-deployment.yaml
 ```
-#### Check the status of the rollout:
+##### Check the status of the rollout:
 
 ```bash
 kubectl rollout status deployments kubeserve
 ```
-#### Check the pods have been created:
+##### Check the pods have been created:
 
 ```bash
 kubectl get pods
 ```
-#### Connect to our pod and create a file on the PV:
+##### Connect to our pod and create a file on the PV:
 
 ```bash
 kubectl exec -it [pod-name] -- touch /data/file1.txt
 ```
-#### Connect to our pod and list the contents of the /data directory:
+##### Connect to our pod and list the contents of the /data directory:
 
 ```bash
 kubectl exec -it [pod-name] -- ls /data
@@ -2175,36 +2187,36 @@ kubectl exec -it [pod-name] -- ls /data
 
 ## Security 12%
 
-############ Kubernetes Security Primitives ############ 
+### Kubernetes Security Primitives 
 
 Expanding on our discussion about securing the Kubernetes cluster, we’ll take a look at service accounts and user authentication. Also in this lesson, we will create a workstation for you to administer your cluster without logging in to the Kubernetes master server.
 
-#### List the service accounts in your cluster:
+##### List the service accounts in your cluster:
 
 ```bash
 kubectl get serviceaccounts
 ```
-#### Create a new jenkins service account:
+##### Create a new jenkins service account:
 
 ```bash
 kubectl create serviceaccount jenkins
 ```
-#### Use the abbreviated version of serviceAccount:
+##### Use the abbreviated version of serviceAccount:
 
 ```bash
 kubectl get sa
 ```
-#### View the YAML for our service account:
+##### View the YAML for our service account:
 
 ```bash
 kubectl get serviceaccounts jenkins -o yaml
 ```
-#### View the secrets in your cluster:
+##### View the secrets in your cluster:
 
 ```bash
 kubectl get secret [secret_name]
 ```
-#### The YAML for a busybox pod using the jenkins service account:
+##### The YAML for a busybox pod using the jenkins service account:
 
 ```bash
 apiVersion: v1
@@ -2223,57 +2235,57 @@ spec:
     name: busybox
   restartPolicy: Always
 ```
-#### Create a new pod with the service account:
+##### Create a new pod with the service account:
 
 ```bash
 kubectl apply -f busybox.yaml
 ```
-#### View the cluster config that kubectl uses:
+##### View the cluster config that kubectl uses:
 
 ```bash
 kubectl config view
 ```
-#### View the config file:
+##### View the config file:
 
 ```bash
 cat ~/.kube/config
 ```
-#### Set new credentials for your cluster:
+##### Set new credentials for your cluster:
 
 ```bash
 kubectl config set-credentials chad --username=chad --password=password
 ```
-#### Create a role binding for anonymous users (not recommended):
+##### Create a role binding for anonymous users (not recommended):
 
 ```bash
 kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster-admin --user=system:anonymous
 ```
-#### SCP the certificate authority to your workstation or server:
+##### SCP the certificate authority to your workstation or server:
 
 ```bash
 scp ca.crt cloud_user@[pub-ip-of-remote-server]:~/
 ```
-#### Set the cluster address and authentication:
+##### Set the cluster address and authentication:
 
 ```bash
 kubectl config set-cluster kubernetes --server=https://172.31.41.61:6443 --certificate-authority=ca.crt --embed-certs=true
 ```
-#### Set the credentials for Chad:
+##### Set the credentials for Chad:
 
 ```bash
 kubectl config set-credentials chad --username=chad --password=password
 ```
-#### Set the context for the cluster:
+##### Set the context for the cluster:
 
 ```bash
 kubectl config set-context kubernetes --cluster=kubernetes --user=chad --namespace=default
 ```
-#### Use the context:
+##### Use the context:
 
 ```bash
 kubectl config use-context kubernetes
 ```
-#### Run the same commands with kubectl:
+##### Run the same commands with kubectl:
 
 ```bash
 kubectl get nodes
@@ -2284,16 +2296,16 @@ Authentication https://kubernetes.io/docs/reference/access-authn-authz/authentic
 Administer the Cluster via kubectl https://kubernetes.io/docs/reference/kubectl/overview/
 
 
-############ Cluster Authentication and Authorization ############ 
+### Cluster Authentication and Authorization 
 
 Once the API server has determined who you are (whether a pod or a user), the authorization is handled by RBAC. In this lesson, we will talk about roles, cluster roles, role bindings, and cluster role bindings.
 
-#### Create a new namespace:
+##### Create a new namespace:
 
 ```bash
 kubectl create ns web
 ```
-#### The YAML for a service role:
+##### The YAML for a service role:
 
 ```bash
 apiVersion: rbac.authorization.k8s.io/v1
@@ -2306,37 +2318,37 @@ rules:
   verbs: ["get", "list"]
   resources: ["services"]
 ```
-#### Create a new role from that YAML file:
+##### Create a new role from that YAML file:
 
 ```bash
 kubectl apply -f role.yaml
 ```
-#### Create a RoleBinding:
+##### Create a RoleBinding:
 
 ```bash
 kubectl create rolebinding test --role=service-reader --serviceaccount=web:default -n web
 ```
-#### Run a proxy for inter-cluster communications:
+##### Run a proxy for inter-cluster communications:
 
 ```bash
 kubectl proxy
 ```
-#### Try to access the services in the web namespace:
+##### Try to access the services in the web namespace:
 
 ```bash
 curl localhost:8001/api/v1/namespaces/web/services
 ```
-#### Create a ClusterRole to access PersistentVolumes:
+##### Create a ClusterRole to access PersistentVolumes:
 
 ```bash
 kubectl create clusterrole pv-reader --verb=get,list --resource=persistentvolumes
 ```
-#### Create a ClusterRoleBinding for the cluster role:
+##### Create a ClusterRoleBinding for the cluster role:
 
 ```bash
 kubectl create clusterrolebinding pv-test --clusterrole=pv-reader --serviceaccount=web:default
 ```
-#### The YAML for a pod that includes a curl and proxy container:
+##### The YAML for a pod that includes a curl and proxy container:
 
 ```bash
 apiVersion: v1
@@ -2353,22 +2365,22 @@ spec:
     name: proxy
   restartPolicy: Always
 ```
-#### Create the pod that will allow you to curl directly from the container:
+##### Create the pod that will allow you to curl directly from the container:
 
 ```bash
 kubectl apply -f curl-pod.yaml
 ```
-#### Get the pods in the web namespace:
+##### Get the pods in the web namespace:
 
 ```bash
 kubectl get pods -n web
 ```
-#### Open a shell to the container:
+##### Open a shell to the container:
 
 ```bash
 kubectl exec -it curlpod -n web -- sh
 ```
-#### Access PersistentVolumes (cluster-level) from the pod:
+##### Access PersistentVolumes (cluster-level) from the pod:
 
 ```bash
 curl localhost:8001/api/v1/persistentvolumes
@@ -2378,11 +2390,11 @@ Authorizationhttps://kubernetes.io/docs/reference/access-authn-authz/authorizati
 RBAC https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 RoleBinding and ClusterRoleBinding https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding
 
-############ Configuring Network Policies ############ 
+### Configuring Network Policies 
 
 Network policies allow you to specify which pods can talk to other pods. This helps when securing communication between pods, allowing you to identify ingress and egress rules. You can apply a network policy to a pod by using pod or namespace selectors. You can even choose a CIDR block range to apply the network policy. In this lesson, we’ll go through each of these options for network policies.
 
-#### Download the canal plugin:
+##### Download the canal plugin:
 
 ```bash
 wget -O canal.yaml https://docs.projectcalico.org/v3.5/getting-started/kubernetes/installation/hosted/canal/canal.yaml
@@ -2392,7 +2404,7 @@ Apply the canal plugin:
 ```bash
 kubectl apply -f canal.yaml
 ```
-#### The YAML for a deny-all NetworkPolicy:
+##### The YAML for a deny-all NetworkPolicy:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -2404,23 +2416,23 @@ spec:
   policyTypes:
   - Ingress
 ```
-#### Run a deployment to test the NetworkPolicy:
+##### Run a deployment to test the NetworkPolicy:
 
 ```bash
 kubectl run nginx --image=nginx --replicas=2
 ```
-#### Create a service for the deployment:
+##### Create a service for the deployment:
 
 ```bash
 kubectl expose deployment nginx --port=80
 ```
-#### Attempt to access the service by using a busybox interactive pod:
+##### Attempt to access the service by using a busybox interactive pod:
 
 ```bash
 kubectl run busybox --rm -it --image=busybox /bin/sh
 wget --spider --timeout=1 nginx
 ```
-#### The YAML for a pod selector NetworkPolicy:
+##### The YAML for a pod selector NetworkPolicy:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -2439,12 +2451,12 @@ spec:
     ports:
     - port: 5432
 ```
-#### Label a pod to get the NetworkPolicy:
+##### Label a pod to get the NetworkPolicy:
 
 ```bash
 kubectl label pods [pod_name] app=db
 ```
-#### The YAML for a namespace NetworkPolicy:
+##### The YAML for a namespace NetworkPolicy:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -2463,7 +2475,7 @@ spec:
     ports:
     - port: 5432
 ```
-#### The YAML for an IP block NetworkPolicy:
+##### The YAML for an IP block NetworkPolicy:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -2479,7 +2491,7 @@ spec:
     - ipBlock:
         cidr: 192.168.1.0/24
 ```
-#### The YAML for an egress NetworkPolicy:
+##### The YAML for an egress NetworkPolicy:
 
 ```bash
 apiVersion: networking.k8s.io/v1
@@ -2506,39 +2518,39 @@ Default Network Policies https://kubernetes.io/docs/concepts/services-networking
 
 
 
-############ Creating TLS Certificates ############ 
+### Creating TLS Certificates 
 
 A Certificate Authority (CA) is used to generate TLS certificates and authenticate to your API server. In this lesson, we’ll go through certificate requests and generating a new certificate.
 
-#### Find the CA certificate on a pod in your cluster:
+##### Find the CA certificate on a pod in your cluster:
 
 ```bash
 kubectl exec busybox -- ls /var/run/secrets/kubernetes.io/serviceaccount
 ```
-#### Download the binaries for the cfssl tool:
+##### Download the binaries for the cfssl tool:
 
 ```bash
 wget -q --show-progress --https-only --timestamping \
   https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 \
   https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
 ```
-#### Make the binary files executable:
+##### Make the binary files executable:
 
 ```bash
 chmod +x cfssl_linux-amd64 cfssljson_linux-amd64
 ```
-#### Move the files into your bin directory:
+##### Move the files into your bin directory:
 
 ```bash
 sudo mv cfssl_linux-amd64 /usr/local/bin/cfssl
 sudo mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
 ```
-#### Check to see if you have cfssl installed correctly:
+##### Check to see if you have cfssl installed correctly:
 
 ```bash
 cfssl version
 ```
-#### Create a CSR file:
+##### Create a CSR file:
 
 ```bash
 cat <<EOF | cfssl genkey - | cfssljson -bare server
@@ -2557,7 +2569,7 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
 }
 EOF
 ```
-#### Create a CertificateSigningRequest API object:
+##### Create a CertificateSigningRequest API object:
 
 ```bash
 cat <<EOF | kubectl create -f -
@@ -2575,27 +2587,27 @@ spec:
   - server auth
 EOF
 ```
-#### View the CSRs in the cluster:
+##### View the CSRs in the cluster:
 
 ```bash
 kubectl get csr
 ```
-#### View additional details about the CSR:
+##### View additional details about the CSR:
 
 ```bash
 kubectl describe csr pod-csr.web
 ```
-#### Approve the CSR:
+##### Approve the CSR:
 
 ```bash
 kubectl certificate approve pod-csr.web
 ```
-#### View the certificate within your CSR:
+##### View the certificate within your CSR:
 
 ```bash
 kubectl get csr pod-csr.web -o yaml
 ```
-#### Extract and decode your certificate to use in a file:
+##### Extract and decode your certificate to use in a file:
 
 ```bash
 kubectl get csr pod-csr.web -o jsonpath='{.status.certificate}' \
@@ -2607,61 +2619,61 @@ Bootstrapping TLS for Your kubelets https://kubernetes.io/docs/reference/command
 How kubeadm Manages Certificates https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/
 
 
-############ Secure Images ############ 
+### Secure Images 
 
 Working with secure images is imperative in Kubernetes, as it ensures your applications are running efficiently and protecting you from vulnerabilities. In this lesson, we’ll go through how to set Kubernetes to use a private registry.
 
-#### View where your Docker credentials are stored:
+##### View where your Docker credentials are stored:
 
 ```bash
 sudo vim /home/cloud_user/.docker/config.json
 ```
-#### Log in to the Docker Hub:
+##### Log in to the Docker Hub:
 
 ```bash
 sudo docker login
 ```
-#### View the images currently on your server:
+##### View the images currently on your server:
 
 ```bash
 sudo docker images
 ```
-#### Pull a new image to use with a Kubernetes pod:
+##### Pull a new image to use with a Kubernetes pod:
 
 ```bash
 sudo docker pull busybox:1.28.4
 ```
-#### Log in to a private registry using the docker login command:
+##### Log in to a private registry using the docker login command:
 
 ```bash
 sudo docker login -u podofminerva -p 'otj701c9OucKZOCx5qrRblofcNRf3W+e' podofminerva.azurecr.io
 ```
-#### View your stored credentials:
+##### View your stored credentials:
 
 ```bash
 sudo vim /home/cloud_user/.docker/config.json
 ```
-#### Tag an image in order to push it to a private registry:
+##### Tag an image in order to push it to a private registry:
 
 ```bash
 sudo docker tag busybox:1.28.4 podofminerva.azurecr.io/busybox:latest
 ```
-#### Push the image to your private registry:
+##### Push the image to your private registry:
 
 ```bash
 docker push podofminerva.azurecr.io/busybox:latest
 ```
-#### Create a new docker-registry secret:
+##### Create a new docker-registry secret:
 
 ```bash
 kubectl create secret docker-registry acr --docker-server=https://podofminerva.azurecr.io --docker-username=podofminerva --docker-password='otj701c9OucKZOCx5qrRblofcNRf3W+e' --docker-email=user@example.com
 ```
-#### Modify the default service account to use your new docker-registry secret:
+##### Modify the default service account to use your new docker-registry secret:
 
 ```bash
 kubectl patch sa default -p '{"imagePullSecrets": [{"name": "acr"}]}'
 ```
-#### The YAML for a pod using an image from a private repository:
+##### The YAML for a pod using an image from a private repository:
 
 ```bash
 apiVersion: v1
@@ -2677,17 +2689,17 @@ spec:
       command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
       imagePullPolicy: Always
 ```
-#### Create the pod from the private image:
+##### Create the pod from the private image:
 
 ```bash
 kubectl apply -f acr-pod.yaml
 ```
-#### View the running pod:
+##### View the running pod:
 
 ```bash
 kubectl get pods
 ```
-#### Helpful Links
+##### Helpful Links
 
 ```bash
 Helpful Links
@@ -2697,22 +2709,22 @@ Configure Service Accounts https://kubernetes.io/docs/tasks/configure-pod-contai
 Add ImagePullSecrets https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#add-imagepullsecrets-to-a-service-account
 11 Ways (Not) to Get Hacked https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/
 ```
-############ Defining Security Contexts ############ 
+### Defining Security Contexts 
 
 
 Defining security contexts allows you to lock down your containers, so that only certain processes can do certain things. This ensures the stability of your containers and allows you to give control or take it away. In this lesson, we’ll go through how to set the security context at the container level and the pod level.
 
-#### Run an alpine container with default security:
+##### Run an alpine container with default security:
 
 ```bash
 kubectl run pod-with-defaults --image alpine --restart Never -- /bin/sleep 999999
 ```
-#### Check the ID on the container:
+##### Check the ID on the container:
 
 ```bash
 kubectl exec pod-with-defaults id
 ```
-#### The YAML for a container that runs as a user:
+##### The YAML for a container that runs as a user:
 
 ```bash
 apiVersion: v1
@@ -2727,17 +2739,17 @@ spec:
     securityContext:
       runAsUser: 405
 ```
-#### Create a pod that runs the container as user:
+##### Create a pod that runs the container as user:
 
 ```bash
 kubectl apply -f alpine-user-context.yaml
 ```
-#### View the IDs of the new pod created with container user permission:
+##### View the IDs of the new pod created with container user permission:
 
 ```bash
 kubectl exec alpine-user-context id
 ```
-#### The YAML for a pod that runs the container as non-root:
+##### The YAML for a pod that runs the container as non-root:
 
 ```bash
 apiVersion: v1
@@ -2752,17 +2764,17 @@ spec:
     securityContext:
       runAsNonRoot: true
 ```
-#### Create a pod that runs the container as non-root:
+##### Create a pod that runs the container as non-root:
 
 ```bash
 kubectl apply -f alpine-nonroot.yaml
 ```
-#### View more information about the pod error:
+##### View more information about the pod error:
 
 ```bash
 kubectl describe pod alpine-nonroot
 ```
-#### The YAML for a privileged container pod:
+##### The YAML for a privileged container pod:
 
 ```bash
 apiVersion: v1
@@ -2777,27 +2789,27 @@ spec:
     securityContext:
       privileged: true
 ```
-#### Create the privileged container pod:
+##### Create the privileged container pod:
 
 ```bash
 kubectl apply -f privileged-pod.yaml
 ```
-#### View the devices on the default container:
+##### View the devices on the default container:
 
 ```bash
 kubectl exec -it pod-with-defaults ls /dev
 ```
-#### View the devices on the privileged pod container:
+##### View the devices on the privileged pod container:
 
 ```bash
 kubectl exec -it privileged-pod ls /dev
 ```
-#### Try to change the time on a default container pod:
+##### Try to change the time on a default container pod:
 
 ```bash
 kubectl exec -it pod-with-defaults -- date +%T -s "12:00:00"
 ```
-#### The YAML for a container that will allow you to change the time:
+##### The YAML for a container that will allow you to change the time:
 
 ```bash
 apiVersion: v1
@@ -2814,22 +2826,22 @@ spec:
         add:
         - SYS_TIME
 ```
-#### Create the pod that will allow you to change the container’s time:
+##### Create the pod that will allow you to change the container’s time:
 
 ```bash
 kubectl run -f kernelchange-pod.yaml
 ```
-#### Change the time on a container:
+##### Change the time on a container:
 
 ```bash
 kubectl exec -it kernelchange-pod -- date +%T -s "12:00:00"
 ```
-#### View the date on the container:
+##### View the date on the container:
 
 ```bash
 kubectl exec -it kernelchange-pod -- date
 ```
-#### The YAML for a container that removes capabilities:
+##### The YAML for a container that removes capabilities:
 
 ```bash
 apiVersion: v1
@@ -2846,17 +2858,17 @@ spec:
         drop:
         - CHOWN
 ```
-#### Create a pod that’s container has capabilities removed:
+##### Create a pod that’s container has capabilities removed:
 
 ```bash
 kubectl apply -f remove-capabilities.yaml
 ```
-#### Try to change the ownership of a container with removed capability:
+##### Try to change the ownership of a container with removed capability:
 
 ```bash
 kubectl exec remove-capabilities chown guest /tmp
 ```
-#### The YAML for a pod container that can’t write to the local filesystem:
+##### The YAML for a pod container that can’t write to the local filesystem:
 
 ```bash
 apiVersion: v1
@@ -2878,27 +2890,27 @@ spec:
   - name: my-volume
     emptyDir:
 ```
-#### Create a pod that will not allow you to write to the local container filesystem:
+##### Create a pod that will not allow you to write to the local container filesystem:
 
 ```bash
 kubectl apply -f readonly-pod.yaml
 ```
-#### Try to write to the container filesystem:
+##### Try to write to the container filesystem:
 
 ```bash
 kubectl exec -it readonly-pod touch /new-file
 ```
-#### Create a file on the volume mounted to the container:
+##### Create a file on the volume mounted to the container:
 
 ```bash
 kubectl exec -it readonly-pod touch /volume/newfile
 ```
-#### View the file on the volume that’s mounted:
+##### View the file on the volume that’s mounted:
 
 ```bash
 kubectl exec -it readonly-pod -- ls -la /volume/newfile
 ```
-#### The YAML for a pod that has different group permissions for different pods:
+##### The YAML for a pod that has different group permissions for different pods:
 
 ```bash
 apiVersion: v1
@@ -2932,12 +2944,12 @@ spec:
   - name: shared-volume
     emptyDir:
 ```
-#### Create a pod with two containers and different group permissions:
+##### Create a pod with two containers and different group permissions:
 
 ```bash
 kubectl apply -f group-context.yaml
 ```
-#### Open a shell to the first container on that pod:
+##### Open a shell to the first container on that pod:
 
 ```bash
 kubectl exec -it group-context -c first sh
@@ -2945,52 +2957,52 @@ kubectl exec -it group-context -c first sh
 Helpful Links
 Security Contexts https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 
-############ Securing Persistent Key Value Store ############ 
+### Securing Persistent Key Value Store 
 
 Secrets are used to secure sensitive data you may access from your pod. The data never gets written to disk because it's stored in an in-memory filesystem (tmpfs). Because secrets can be created independently of pods, there is less risk of the secret being exposed during the pod lifecycle.
 
-#### View the secrets in your cluster:
+##### View the secrets in your cluster:
 
 ```bash
 kubectl get secrets
 ```
-#### View the default secret mounted to each pod:
+##### View the default secret mounted to each pod:
 
 ```bash
 kubectl describe pods pod-with-defaults
 ```
-#### View the token, certificate, and namespace within the secret:
+##### View the token, certificate, and namespace within the secret:
 
 ```bash
 kubectl describe secret
 ```
-#### Generate a key for your https server:
+##### Generate a key for your https server:
 
 ```bash
 openssl genrsa -out https.key 2048
 ```
-#### Generate a certificate for the https server:
+##### Generate a certificate for the https server:
 
 
 ```bash
 openssl req -new -x509 -key https.key -out https.cert -days 3650 -subj /CN=www.example.com
 ```
-#### Create an empty file to create the secret:
+##### Create an empty file to create the secret:
 
 ```bash
 touch file
 ```
-#### Create a secret from your key, cert, and file:
+##### Create a secret from your key, cert, and file:
 
 ```bash
 kubectl create secret generic example-https --from-file=https.key --from-file=https.cert --from-file=file
 ```
-#### View the YAML from your new secret:
+##### View the YAML from your new secret:
 
 ```bash
 kubectl get secrets example-https -o yaml
 ```
-#### Create the configMap that will mount to your pod:
+##### Create the configMap that will mount to your pod:
 
 ```bash
 apiVersion: v1
@@ -3017,7 +3029,7 @@ data:
   sleep-interval: |
     25
 ```
-#### The YAML for a pod using the new secret:
+##### The YAML for a pod using the new secret:
 
 ```bash
 apiVersion: v1
@@ -3065,22 +3077,22 @@ spec:
     secret:
       secretName: example-https
 ```
-#### Describe the nginx conf via ConfigMap:
+##### Describe the nginx conf via ConfigMap:
 
 ```bash
 kubectl describe configmap
 ```
-#### View the cert mounted on the container:
+##### View the cert mounted on the container:
 
 ```bash
 kubectl exec example-https -c web-server -- mount | grep certs
 ```
-#### Use port forwarding on the pod to server traffic from 443:
+##### Use port forwarding on the pod to server traffic from 443:
 
 ```bash
 kubectl port-forward example-https 8443:443 &
 ```
-#### Curl the web server to get a response:
+##### Curl the web server to get a response:
 
 ```bash
 curl https://localhost:8443 -k
@@ -3092,56 +3104,56 @@ Secrets https://kubernetes.io/docs/concepts/configuration/secret/
 
 ## Logging / Monitoring 5%
 
-############ Monitoring the Cluster Components ############ 
+### Monitoring the Cluster Components 
 
 We are able to monitor the CPU and memory utilization of our pods and nodes by using the metrics server. In this lesson, we’ll install the metrics server and see how the kubectl top command works.
 
-#### Clone the metrics server repository:
+##### Clone the metrics server repository:
 
 ```bash
 git clone https://github.com/linuxacademy/metrics-server
 ```
-#### Install the metrics server in your cluster:
+##### Install the metrics server in your cluster:
 
 ```bash
 kubectl apply -f ~/metrics-server/deploy/1.8+/
 ```
-#### Get a response from the metrics server API:
+##### Get a response from the metrics server API:
 
 ```bash
 kubectl get --raw /apis/metrics.k8s.io/
 ```
-#### Get the CPU and memory utilization of the nodes in your cluster:
+##### Get the CPU and memory utilization of the nodes in your cluster:
 
 ```bash
 kubectl top node
 ```
-#### Get the CPU and memory utilization of the pods in your cluster:
+##### Get the CPU and memory utilization of the pods in your cluster:
 
 ```bash
 kubectl top pods
 ```
-#### Get the CPU and memory of pods in all namespaces:
+##### Get the CPU and memory of pods in all namespaces:
 
 ```bash
 kubectl top pods --all-namespaces
 ```
-#### Get the CPU and memory of pods in only one namespace:
+##### Get the CPU and memory of pods in only one namespace:
 
 ```bash
 kubectl top pods -n kube-system
 ```
-#### Get the CPU and memory of pods with a label selector:
+##### Get the CPU and memory of pods with a label selector:
 
 ```bash
 kubectl top pod -l run=pod-with-defaults
 ```
-#### Get the CPU and memory of a specific pod:
+##### Get the CPU and memory of a specific pod:
 
 ```bash
 kubectl top pod pod-with-defaults
 ```
-#### Get the CPU and memory of the containers inside the pod:
+##### Get the CPU and memory of the containers inside the pod:
 
 ```bash
 kubectl top pods group-context --containers
@@ -3150,11 +3162,11 @@ Helpful Links
 Monitor Node Health https://kubernetes.io/docs/tasks/debug-application-cluster/monitor-node-health/
 Resource Usage Monitoring https://kubernetes.io/docs/tasks/debug-application-cluster/resource-usage-monitoring/
 
-############ Monitoring the Applications Running within a Cluster ############ 
+### Monitoring the Applications Running within a Cluster 
 
 There are ways Kubernetes can automatically monitor your apps for you and, furthermore, fix them by either restarting or preventing them from affecting the rest of your service. You can insert liveness probes and readiness probes to do just this for custom monitoring of your applications.
 
-#### The pod YAML for a liveness probe:
+##### The pod YAML for a liveness probe:
 
 ```bash
 apiVersion: v1
@@ -3170,7 +3182,7 @@ spec:
         path: /
         port: 80
 ```
-#### The YAML for a service and two pods with readiness probes:
+##### The YAML for a service and two pods with readiness probes:
 
 ```bash
 apiVersion: v1
@@ -3219,27 +3231,27 @@ spec:
       initialDelaySeconds: 5
       periodSeconds: 5
 ```
-#### Create the service and two pods with readiness probes:
+##### Create the service and two pods with readiness probes:
 
 ```bash
 kubectl apply -f readiness.yaml
 ```
-#### Check if the readiness check passed or failed:
+##### Check if the readiness check passed or failed:
 
 ```bash
 kubectl get pods
 ```
-#### Check if the failed pod has been added to the list of endpoints:
+##### Check if the failed pod has been added to the list of endpoints:
 
 ```bash
 kubectl get ep
 ```
-#### Edit the pod to fix the problem and enter it back into the service:
+##### Edit the pod to fix the problem and enter it back into the service:
 
 ```bash
 kubectl edit pod [pod_name]
 ```
-#### Get the list of endpoints to see that the repaired pod is part of the service again:
+##### Get the list of endpoints to see that the repaired pod is part of the service again:
 
 ```bash
 kubectl get ep
@@ -3247,21 +3259,21 @@ kubectl get ep
 Helpful Links
 Container Probes https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
 
-############ Managing Cluster Component Logs ############ 
+### Managing Cluster Component Logs 
 
 There are many ways to manage the logs that can accumulate from both applications and system components. In this lesson, we’ll go through a few different approaches to organizing your logs.
 
-#### The directory where the continainer logs reside:
+##### The directory where the continainer logs reside:
 
 ```bash
 /var/log/containers
 ```
-#### The directory where kubelet stores its logs:
+##### The directory where kubelet stores its logs:
 
 ```bash
 /var/log
 ```
-#### The YAML for a pod that has two different log streams:
+##### The YAML for a pod that has two different log streams:
 
 ```bash
 apiVersion: v1
@@ -3292,17 +3304,17 @@ spec:
     emptyDir: {}
 ```
 
-#### Create a pod that has two different log streams to the same directory:
+##### Create a pod that has two different log streams to the same directory:
 
 ```bash
 kubectl apply -f twolog.yaml
 ```
-#### View the logs in the /var/log directory of the container:
+##### View the logs in the /var/log directory of the container:
 
 ```bash
 kubectl exec counter -- ls /var/log
 ```
-#### The YAML for a sidecar container that will tail the logs for each type:
+##### The YAML for a sidecar container that will tail the logs for each type:
 
 ```bash
 apiVersion: v1
@@ -3345,12 +3357,12 @@ spec:
     emptyDir: {}
 ```
 
-#### View the first type of logs separately:
+##### View the first type of logs separately:
 
 ```bash
 kubectl logs counter count-log-1
 ```
-#### View the second type of logs separately:
+##### View the second type of logs separately:
 
 ```bash
 kubectl logs counter count-log-2
@@ -3359,56 +3371,56 @@ Helpful Links
 Logging https://kubernetes.io/docs/concepts/cluster-administration/logging/
 
 
-############ Managing Application Logs ############ 
+### Managing Application Logs 
 
 Containerized applications usually write their logs to standard out and standard error instead of writing their logs to files. Docker then redirects those streams to files. You can retrieve those files with the kubectl logs command in Kubernetes. In this lesson, we’ll go over the many ways to manipulate the output of your logs and redirect them to a file.
 
-#### Get the logs from a pod:
+##### Get the logs from a pod:
 
 ```bash
 kubectl logs nginx
 ```
-#### Get the logs from a specific container on a pod:
+##### Get the logs from a specific container on a pod:
 
 ```bash
 kubectl logs counter -c count-log-1
 ```
-#### Get the logs from all containers on the pod:
+##### Get the logs from all containers on the pod:
 
 ```bash
 kubectl logs counter --all-containers=true
 ```
-#### Get the logs from containers with a certain label:
+##### Get the logs from containers with a certain label:
 
 ```bash
 kubectl logs -lapp=nginx
 ```
-#### Get the logs from a previously terminated container within a pod:
+##### Get the logs from a previously terminated container within a pod:
 
 ```bash
 kubectl logs -p -c nginx nginx
 ```
-#### Stream the logs from a container in a pod:
+##### Stream the logs from a container in a pod:
 
 ```bash
 kubectl logs -f -c count-log-1 counter
 ```
-#### Tail the logs to only view a certain number of lines:
+##### Tail the logs to only view a certain number of lines:
 
 ```bash
 kubectl logs --tail=20 nginx
 ```
-#### View the logs from a previous time duration:
+##### View the logs from a previous time duration:
 
 ```bash
 kubectl logs --since=1h nginx
 ```
-#### View the logs from a container within a pod within a deployment:
+##### View the logs from a container within a pod within a deployment:
 
 ```bash
 kubectl logs deployment/nginx -c nginx
 ```
-#### Redirect the output of the logs to a file:
+##### Redirect the output of the logs to a file:
 
 ```bash
 kubectl logs counter -c count-log-1 > count.log
@@ -3421,11 +3433,11 @@ Logs https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#log
 
 ## Troubleshooting 10%
 
-############ Troubleshooting Application Failure ############ 
+### Troubleshooting Application Failure 
 
 Application failure can happen for many reasons, but there are ways within Kubernetes that make it a little easier to discover why. In this lesson, we’ll fix some broken pods and show common methods to troubleshoot.
 
-#### The YAML for a pod with a termination reason:
+##### The YAML for a pod with a termination reason:
 
 ```bash
 apiVersion: v1
@@ -3442,12 +3454,12 @@ spec:
     - 'echo "I''ve had enough" > /var/termination-reason ; exit 1'
     terminationMessagePath: /var/termination-reason
 ```
-#### One of the first steps in troubleshooting is usually to describe the pod:
+##### One of the first steps in troubleshooting is usually to describe the pod:
 
 ```bash
 kubectl describe po pod2
 ```
-#### The YAML for a liveness probe that checks for pod health:
+##### The YAML for a liveness probe that checks for pod health:
 
 ```bash
 apiVersion: v1
@@ -3463,17 +3475,17 @@ spec:
         path: /healthz
         port: 8081
 ```
-#### View the logs for additional detail:
+##### View the logs for additional detail:
 
 ```bash
 kubectl logs pod-with-defaults
 ```
-#### Export the YAML of a running pod, in the case that you are unable to edit it directly:
+##### Export the YAML of a running pod, in the case that you are unable to edit it directly:
 
 ```bash
 kubectl get po pod-with-defaults -o yaml --export > defaults-pod.yaml
 ```
-#### Edit a pod directly (i.e., changing the image):
+##### Edit a pod directly (i.e., changing the image):
 
 ```bash
 kubectl edit po nginx
@@ -3487,52 +3499,52 @@ The Pod Lifecycle https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecyc
 
 
 
-############ Troubleshooting Control Plane Failure ############ 
+### Troubleshooting Control Plane Failure 
 
 The Kubernetes Control Plane is an important component to back up and protect against failure. There are certain best practices you can take to ensure you don’t have a single point of failure. If your Control Plane components are not effectively communicating, there are a few things you can check to ensure your cluster is operating efficiently.
 
-#### Check the events in the kube-system namespace for errors:
+##### Check the events in the kube-system namespace for errors:
 
 ```bash
 kubectl get events -n kube-system
 ```
-#### Get the logs from the individual pods in your kube-system namespace and check for errors:
+##### Get the logs from the individual pods in your kube-system namespace and check for errors:
 
 ```bash
 kubectl logs [kube_scheduler_pod_name] -n kube-system
 ```
-#### Check the status of the Docker service:
+##### Check the status of the Docker service:
 
 ```bash
 sudo systemctl status docker
 ```
-#### Start up and enable the Docker service, so it starts upon bootup:
+##### Start up and enable the Docker service, so it starts upon bootup:
 
 ```bash
 sudo systemctl enable docker && systemctl start docker
 ```
-#### Check the status of the kubelet service:
+##### Check the status of the kubelet service:
 
 ```bash
 sudo systemctl status kubelet
 ```
-#### Start up and enable the kubelet service, so it starts up when the machine is rebooted:
+##### Start up and enable the kubelet service, so it starts up when the machine is rebooted:
 
 ```bash
 sudo systemctl enable kubelet && systemctl start kubelet
 ```
-#### Turn off swap on your machine:
+##### Turn off swap on your machine:
 
 ```bash
 sudo su -
 swapoff -a && sed -i '/ swap / s/^/#/' /etc/fstab
 ```
-#### Check if you have a firewall running:
+##### Check if you have a firewall running:
 
 ```bash
 sudo systemctl status firewalld
 ```
-#### Disable the firewall and stop the firewalld service:
+##### Disable the firewall and stop the firewalld service:
 
 ```bash
 sudo systemctl disable firewalld && systemctl stop firewalld
@@ -3545,51 +3557,51 @@ Master HA https://kubernetes.io/docs/tasks/administer-cluster/highly-available-m
 
 
 
-############ Troubleshooting Worker Node Failure ############ 
+### Troubleshooting Worker Node Failure 
 
 Troubleshooting worker node failure is a lot like troubleshooting a non-responsive server, in addition to the kubectl tools we have at our disposal. In this lesson, we’ll learn how to recover a node and add it back to the cluster and find out how to identify when the kublet service is down.
 
-#### Listing the status of the nodes should be the first step:
+##### Listing the status of the nodes should be the first step:
 
 ```bash
 kubectl get nodes
 ```
-#### Find out more information about the nodes with kubectl describe:
+##### Find out more information about the nodes with kubectl describe:
 
 ```bash
 kubectl describe nodes chadcrowell2c.mylabserver.com
 ```
-#### You can try to log in to your server via SSH:
+##### You can try to log in to your server via SSH:
 
 ```bash
 ssh chadcrowell2c.mylabserver.com
 ```
-#### Get the IP address of your nodes:
+##### Get the IP address of your nodes:
 
 ```bash
 kubectl get nodes -o wide
 ```
-#### Use the IP address to further probe the server:
+##### Use the IP address to further probe the server:
 
 ```bash
 ssh cloud_user@172.31.29.182
 ```
-#### Generate a new token after spinning up a new server:
+##### Generate a new token after spinning up a new server:
 
 ```bash
 sudo kubeadm token generate
 ```
-#### Create the kubeadm join command for your new worker node:
+##### Create the kubeadm join command for your new worker node:
 
 ```bash
 sudo kubeadm token create [token_name] --ttl 2h --print-join-command
 ```
-#### View the journalctl logs:
+##### View the journalctl logs:
 
 ```bash
 sudo journalctl -u kubelet
 ```
-#### View the syslogs:
+##### View the syslogs:
 
 ```bash
 sudo more syslog | tail -120 | grep kubelet
@@ -3598,11 +3610,11 @@ Nodes https://kubernetes.io/docs/concepts/architecture/nodes/
 Explore Nodes https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/#nodes
 
 
-############ Troubleshooting Networking ############ 
+### Troubleshooting Networking 
 
 Network issues usually start to arise internally or when using a service. In this lesson, we’ll go through the many methods to see if your app is serving traffic by creating a service and testing the communication within the cluster.
 
-#### Run a deployment using the container port 9376 and with three replicas:
+##### Run a deployment using the container port 9376 and with three replicas:
 
 ```bash
 kubectl run hostnames --image=k8s.gcr.io/serve_hostname \
@@ -3610,77 +3622,77 @@ kubectl run hostnames --image=k8s.gcr.io/serve_hostname \
                         --port=9376 \
                         --replicas=3
 ```
-#### List the services in your cluster:
+##### List the services in your cluster:
 
 ```bash
 kubectl get svc
 ```
-#### Create a service by exposing a port on the deployment:
+##### Create a service by exposing a port on the deployment:
 
 ```bash
 kubectl expose deployment hostnames --port=80 --target-port=9376
 ```
-#### Run an interactive busybox pod:
+##### Run an interactive busybox pod:
 
 ```bash
 kubectl run -it --rm --restart=Never busybox --image=busybox:1.28 sh
 ```
-#### From the pod, check if DNS is resolving hostnames:
+##### From the pod, check if DNS is resolving hostnames:
 
 ```bash
 nslookup hostnames
 ```
-#### From the pod, cat out the /etc/resolv.conf file:
+##### From the pod, cat out the /etc/resolv.conf file:
 
 ```bash
 cat /etc/resolv.conf
 ```
-#### From the pod, look up the DNS name of the Kubernetes service:
+##### From the pod, look up the DNS name of the Kubernetes service:
 
 ```bash
 nslookup kubernetes.default
 ```
-#### Get the JSON output of your service:
+##### Get the JSON output of your service:
 
 ```bash
 kubectl get svc hostnames -o json
 ```
-#### View the endpoints for your service:
+##### View the endpoints for your service:
 
 ```bash
 kubectl get ep
 ```
-#### Communicate with the pod directly (without the service):
+##### Communicate with the pod directly (without the service):
 
 ```bash
 wget -qO- 10.244.1.6:9376
 ```
-#### Check if kube-proxy is running on the nodes:
+##### Check if kube-proxy is running on the nodes:
 
 ```bash
 ps auxw | grep kube-proxy
 ```
-#### Check if kube-proxy is writing iptables:
+##### Check if kube-proxy is writing iptables:
 
 ```bash
 iptables-save | grep hostnames
 ```
-#### View the list of kube-system pods:
+##### View the list of kube-system pods:
 
 ```bash
 kubectl get pods -n kube-system
 ```
-#### Connect to your kube-proxy pod in the kube-system namespace:
+##### Connect to your kube-proxy pod in the kube-system namespace:
 
 ```bash
 kubectl exec -it kube-proxy-cqptg -n kube-system -- sh
 ```
-#### Delete the flannel CNI plugin:
+##### Delete the flannel CNI plugin:
 
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
 ```
-#### Apply the Weave Net CNI plugin:
+##### Apply the Weave Net CNI plugin:
 
 ```bash
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
@@ -3701,7 +3713,7 @@ kubectl create secret docker-registry private-reg-cred --docker-username=dock_us
 ## ConfigMaps
 
 
-################### static pods ################### 
+########## static pods####### 
 
 ```bash
 ps -aux|grep kubelet |grep yaml
@@ -3723,7 +3735,7 @@ greenbox.yaml
 node01 $ rm greenbox.yaml
 ```
 
-### Rollouts ################### 
+### Rollouts####### 
 ```bash
 kubectl run --restart=Never --image=busybox:1.28.4 static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
 kubectl rollout status deployment/myapp-deployment
@@ -3732,7 +3744,7 @@ kubectl set image deployment/frontend simple-webapp=kodekloud/webapp-color:v2
 kubectl rollout undo deployment/myapp-deployment
 ```
 
-################### upgrade os ################### 
+########## upgrade os####### 
 
 ```bash
 kubectl drain node01 --ignore-daemonsets
@@ -3740,7 +3752,7 @@ kubectl uncordon node01
 kubectl cordon node01
 apt install kubeadm=1.12.0-00 and then apt install kubelet=1.12.0-00 and then kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
 ```
-################### backup ################### 
+########## backup####### 
 ```bash
 ETCDCTL_API=3 etcdctl \
 etcdctl snapshot save /tmp/snapshot-pre-boot.db -n ingress-space
@@ -3759,14 +3771,14 @@ openssl x509 -in  server.crt -text
 /etc/kubernetes/pki/users/dev-user/
 
 
-################### Security Contexts ################### 
+########## Security Contexts####### 
 
 ```bash
 kubectl exec -it ubuntu-sleeper -- date -s '19 APR 2012 11:14:00'
 kubectl exec -it ubuntu-sleeper -- date -s '19 APR 2012 11:14:00'
 ```
 
-################### Networking ################### 
+########## Networking####### 
 
 ```bash
 /sbin/ifconfig | grep HWaddr
@@ -3795,7 +3807,7 @@ ps -aux | grep kube-api |grep service-cluster-ip-range
 https://medium.com/@lucky.cs025/kubertnetes-ingress-controller-setup-using-kop-nginx-ingress-6c3da8dde3f8
 
 ```
-################### Ingress ################### 
+########## Ingress####### 
 
 ```bash
 kubectl get ingress --all-namespaces
