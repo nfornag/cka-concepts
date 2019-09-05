@@ -522,3 +522,89 @@ Connect to our pod and list the contents of the /data directory:
 ```bash
 kubectl exec -it [pod-name] -- ls /data
 ```
+```bash
+::::::::::::::
+dpvc.yml
+::::::::::::::
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: drupal-pvc
+spec:
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+::::::::::::::
+dpv.yml
+::::::::::::::
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: drupal-pv
+spec:
+  capacity:
+    storage: 5Gi
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/drupal-data"
+::::::::::::::
+dr.yml
+::::::::::::::
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drupal
+  labels:
+    app: drupal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drupal
+  template:
+    metadata:
+      labels:
+        app: drupal
+    spec:
+      initContainers:
+      - name: init-sites-volume
+        image: drupal:8.6
+        command: ["/bin/bash", "-c"]
+        args: ['cp -r /var/www/html/sites/ /data/; chown www-data:www-data /data/ -R']
+        volumeMounts:
+        - name: durapalinitvolume
+          mountPath: /data
+      containers:
+      - name: drupal
+        image: drupal:8.6
+        volumeMounts:
+        - name: modules
+          mountPath: /var/www/html/modules
+          subPath: modules
+        - name: profiles
+          mountPath: /var/www/html/profiles
+          subPath: profiles
+        - name: sites
+          mountPath: /var/www/html/sites
+          subPath: sites
+        - name: themes
+          mountPath: /var/www/html/themes
+          subPath: themes
+      volumes:
+      - name: durapalinitvolume
+        persistentVolumeClaim:
+          claimName: drupal-pvc
+      - name: modules
+        emptyDir: {}
+      - name: profiles
+        emptyDir: {}
+      - name: sites
+        emptyDir: {}
+      - name: themes
+        emptyDir: {}
+```
