@@ -329,6 +329,153 @@ kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.cont
 ```
 
 ```bash
+::::::::::::::
+pv1.yml
+::::::::::::::
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis01
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis01"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis02
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis02"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis03
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis03"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis04
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis04"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis05
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis05"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis06
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/redis06"
+---
+::::::::::::::
+redis.yml
+::::::::::::::
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-service
+  labels:
+    app: redis
+spec:
+  ports:
+  - port: 6379
+    name: client
+    targetPort: 6379
+  - port: 16379
+    name: gossip
+    targetPort: 16379
+  clusterIP: None
+  selector:
+    app: redis
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+spec:
+  selector:
+    matchLabels:
+      app: redis # has to match .spec.template.metadata.labels
+  serviceName: "redis-cluster-service"
+  replicas: 6 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: redis # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: redis
+        image: redis:5.0.1-alpine
+        command: ["sudo /conf/update-node.sh", "redis-server", "/conf/redis.conf"]
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: gossip
+        volumeMounts:
+        - name: conf
+          mountPath: /conf
+          readOnly: false
+        - name: data
+          mountPath: /data
+          readOnly: false
+      volumes:
+      - name: conf
+        configMap:
+           name: redis-cluster-configmap
+  volumeClaimTemplates:
+  - metadata:
+     name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+
 
 master $ kubectl get configmap redis-cluster-configmap -o yaml
 apiVersion: v1
@@ -348,12 +495,10 @@ data:
     exec "$@"
 kind: ConfigMap
 metadata:
-  creationTimestamp: "2019-09-10T12:28:00Z"
+  creationTimestamp: "2019-09-10T17:34:01Z"
   name: redis-cluster-configmap
   namespace: default
-  resourceVersion: "2806"
+  resourceVersion: "5145"
   selfLink: /api/v1/namespaces/default/configmaps/redis-cluster-configmap
-  uid: 6d728b90-d3c6-11e9-87a6-0242ac11004c
-master $
-
+  uid: 2db8dfdb-d3f1-11e9-a0d2-0242ac11001b
 ```
