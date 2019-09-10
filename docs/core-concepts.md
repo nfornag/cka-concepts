@@ -328,5 +328,32 @@ kubectl get pv --sort-by=.spec.capacity.storage -o=custom-columns=NAME:.metadata
 kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}" > /opt/outputs/aws-context-name
 ```
 
+```bash
 
+master $ kubectl get configmap redis-cluster-configmap -o yaml
+apiVersion: v1
+data:
+  redis.conf: |-
+    cluster-enabled yes
+    cluster-require-full-coverage no
+    cluster-node-timeout 15000
+    cluster-config-file /data/nodes.conf
+    cluster-migration-barrier 1
+    appendonly yes
+    protected-mode no
+  update-node.sh: |
+    #!/bin/sh
+    REDIS_NODES="/data/nodes.conf"
+    sed -i -e "/myself/ s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/${POD_IP}/" ${REDIS_NODES}
+    exec "$@"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2019-09-10T12:28:00Z"
+  name: redis-cluster-configmap
+  namespace: default
+  resourceVersion: "2806"
+  selfLink: /api/v1/namespaces/default/configmaps/redis-cluster-configmap
+  uid: 6d728b90-d3c6-11e9-87a6-0242ac11004c
+master $
 
+```
