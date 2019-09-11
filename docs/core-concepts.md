@@ -223,12 +223,9 @@ ip link show ens3
 
 openssl genrsa -out nyarlagadda.key 2048
 openssl req -new -key nyarlagadda.key -subj "/CN=nyarlagadda" -out nyarlagadda.csr
-```
-```bash
-kubectl config --kubeconfig=config-demo set-credentials nyarlagadda --client-certificate=/home/ynraju4/nyarlagadda.crt --client-key=/home/ynraju4/nyarlagadda.key
-```
-```bash
-
+::::::::::::::
+csr.yml
+::::::::::::::
 apiVersion: certificates.k8s.io/v1beta1
 kind: CertificateSigningRequest
 metadata:
@@ -240,37 +237,36 @@ spec:
   - digital signature
   - key encipherment
   - server auth
-  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ2VUQ0NBV0VDQVFBd05ERVZNQk1HQTFVRUF3d01ibmxoY214aFoyRmtaR0VnTVJzd0dRWURWUVFLREJKRQpaWFpQY0hNdGJubGhjbXhoW
-jJGa1pHRXdnZ0VpTUEwR0NTcUdTSWIzRFFFQkFRVUFBNElCRHdBd2dnRUtBb0lCCkFRREMyUXA4eXdseFBDRzAvVExKRTM5TXlhRFViL1FYa3pUNmJWYXNsRGEyMXcwZVhVY3VERFdRa2hUN0xNZlIKQWNMVkJtMUI5cWdhb
-VoxeUZOR2QwdThaUUtqWkduTUlrRzdRVEs1dU55Q1J5UnpaYk15dFpyY255cWMwZ0lrZQo3OWUrM28ySXdoUFBtbnpjeGRRYUxURWVqMGp4NWNTWjBXSGFnR3B0dFpnUHlqeDJSMysrVkZNeUlMUDQvak04CmRrRzdZM1FLR
-WI2N0JGcGpoSlcxS3dGeHo4ZzMvcjluaC9BcW9IWXR3OHpINDFEM3hodng2b0NJVnZrYWRDRDQKUlhJeXlESjdQU2pMa2FTbktwTzFMNmNhQ1BzVUUyVWxxVHZvUUxjOE9lMGgvaldPUEFnTElneUFkZngvL2QvaQo0M0xMd
-FN2S0wxTVY5OHA5bFVIc3QzWHBBZ01CQUFHZ0FEQU5CZ2txaGtpRzl3MEJBUXNGQUFPQ0FRRUFQT3R3CkdpdFhHcUo0cXA5S2Raa3ozZjRtL3VwK1VoWi83WExzeU9xS1BmanlSbUJiZzFiY3RXMWtFQlpZVUt1ZkJxSmoKd
-EI4UFdyZzdOOHprWFlZWng5SUZ5bTJ6eFQ1eXZyaC94ZnFaRXVHQ1JLbHFpYmxPdDU4WXJXQ0pQemZWQlU4RgpraThMYVhiY2RiSFIva3lscEYxSkNsTCtyWExEQnVGbDE5ekU0Z3BPZENNSXg3UllleWFneXZ6TXBieEdQT
-kNICk10K2tFS2ppaXZOem80T2p6V0lQYWVocExwS3N4SDlVUE1FLzhOU2szaExYclBkdnJIa1JnVGxYU3N6QWI0UHoKVnl2LytpdXRTRnNKQkJXZEtkcHg0OSt4SXRMYnUyaThHclkyaUNuMlVoZEt6Z1pIWVI5bUFOYmJ4Z
-FBjZk83agpXYjVBVTN1NFhYOW15aTEyT1E9PQotLS0tLUVORCBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0K
-```
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1d6Q0NBVU1DQVFBd0ZqRVVNQklHQTFVRUF3d0xibmxoY214aFoyRmtaR0V3Z2dFaU1BMEdDU3FHU0liMwpEUUVCQVFVQUE0SUJEd0F3Z2dFS0
+FvSUJBUUMrYXk0eFNjazBBUURGbC9JUXNpdGpSaU0
 
-```bash
-echo "L********" |base64 --decode
+kubectl certificate approve nyarlagadda
 
-```
-```bash
+kubectl get csr nyarlagadda -o yaml | awk '/certificate:/ {print $2}' |base64 --decode > nyarlagadda.crt
+export CLUSTER_NAME=grep cluster: .kube/config | awk '/cluster:/ {print $2}' | grep -v cluster:
+export SERVER=grep server: .kube/config | awk '/server:/ {print $2}' | grep -v server:
+grep certificate-authority-data: .kube/config | awk '/certificate-authority-data:/ {print $2}' | grep -v certificate-authority-data: |base64 --decode > ca.crt
+
 kubectl config --kubeconfig=config-demo set-credentials nyarlagadda --client-certificate=nyarlagadda.crt --client-key=nyarlagadda.key
-```
+kubectl config --kubeconfig=config-demo set-cluster $CLUSTER_NAME --server=$SERVER --certificate-authority=ca.crt
+kubectl config --kubeconfig=config-demo set-context cka-practice@gke --cluster=$CLUSTER_NAME --namespace=kube-system --user=nyarlagadda
 
-```bash
-apiVersion: certificates.k8s.io/v1beta1
-kind: CertificateSigningRequest
+::::::::::::::
+crb.yml
+::::::::::::::
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
-  name: nyarlagadda
-spec:
-  groups:
-  - system:authenticated
-  usages:
-  - digital signature
-  - key encipherment
-  - server auth
-  request: 
+  name: role-grantor-binding
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: nyarlagadda 
 ```
 ```bash
 
