@@ -26,6 +26,7 @@ kubectl create deployment webapp --image=kodekloud/webapp-color. The scale the w
 kubectl create deployment --image=nginx nginx
 kubectl set image deployment/clint-deployment clint=stephengride/multiclient:v5
 kubectl scale deployment/webapp --replicas=3
+kubectl scale rs new-replica-set --replicas=5
 kubectl run --generator=run-pod/v1
 kubectl run --generator=run/v1
 kubectl run --generator=deployment/v1beta1
