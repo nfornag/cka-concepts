@@ -39,6 +39,9 @@ kubectl run --generator=cronjob/v2alpha1
 ```bash
 kubectl expose pod redis --port=6379 --name redis-service
 kubectl expose deployment hr-web-app --type=NodePort --port=8080 --name=hr-web-app-service --dry-run -o yaml > webapp-service.yaml
+kubectl expose pod redis --port=6379 --name redis-service --dry-run -o yaml
+kubectl create service clusterip redis --tcp=6379:6379 --dry-run -o yaml
+kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run -o yaml
 ```
 
 ## Secrets
