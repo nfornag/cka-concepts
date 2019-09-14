@@ -545,7 +545,7 @@ The location of a systemd service scheduler pod:
 ```bash
 /var/log/kube-scheduler.log
 ```
-#### * Taint and Tolerations
+### Taint and Tolerations
 
 * Find the taints on particular Node
 ```bash
@@ -580,7 +580,39 @@ spec:
 kubectl taint nodes master node-role.kubernetes.io/master:NoSchedule-
 ```
 
+### Affinity and anti-affinity
 
+* Node Aaffinity rules with keys and Values
+```bash
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: color
+                operator: In
+                values:
+                - blue
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: blue
+```
+* Node Aaffinity rules with only keys
+```bash
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: Exists
+      containers:
+      - image: nginx
+        name: red
+```
 
 
 Helpful Links
