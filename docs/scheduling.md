@@ -545,7 +545,13 @@ The location of a systemd service scheduler pod:
 ```bash
 /var/log/kube-scheduler.log
 ```
-### Taint and Tolerations
+### Taint and Tolerations.
+
+* Label a node 
+
+```bash
+kubectl label node node01 color=blue
+```
 
 * Find the taints on particular Node
 ```bash
