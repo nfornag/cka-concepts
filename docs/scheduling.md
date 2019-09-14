@@ -242,7 +242,7 @@ Run the deployment for my-scheduler:
 ```bash
 kubectl create -f my-scheduler.yaml
 ```
-** Custom Scheduler
+* Custom Scheduler
 ```bash
 master $ more /var/answers/my-scheduler.yaml
 apiVersion: v1
