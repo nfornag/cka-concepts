@@ -43,6 +43,28 @@ Create the pod with disk attached and mounted:
 ```bash
 kubectl apply -f mongodb-pod.yaml
 ```
+
+* Create persistent volume with hostpath
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+```
 See which node the pod landed on:
 
 ```bash
