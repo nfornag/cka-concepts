@@ -335,7 +335,12 @@ spec:
         value: "2"
       - name: edns0
 ```
+* Create API server etcd certificate with etcd ca cert
 
+```bash
+openssl x509 -in apiserver.key -text -noout
+openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt
+```
 Helpful Links
 DNS for Services and Pods https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
 Debugging DNS Resolution https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/
