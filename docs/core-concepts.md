@@ -284,6 +284,20 @@ subjects:
 https://8gwifi.org/docs/kube-rbac.jsp
 ```
 ```bash
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  groups:
+  - system:authenticated
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZV3R6YUdGNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JS=
+```
+```bash
 kubectl config set-credentials user2 --client-certificate=user2.crt --client-key=user2.key
 kubectl config set-credentials nyarlagadda --client-certificate=/home/ynraju4/nyarlagadda.crt --client-key=/home/ynraju4/nyarlagadda.key
 kubectl config set-context test --cluster=hello-world.k8s.local --namespace=kube-system --user=nyarlagadda
