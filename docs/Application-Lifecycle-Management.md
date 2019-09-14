@@ -330,17 +330,16 @@ kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-lite
 apiVersion: v1
 kind: Pod
 metadata:
-  name: dapi-test-pod
+  name: envfrom-secret
 spec:
   containers:
-    - name: test-container
-      image: k8s.gcr.io/busybox
-      command: [ "/bin/sh", "-c", "env" ]
-      envFrom:
-      - configMapRef:
-          name: special-config
-  restartPolicy: Never
+  - name: envars-test-container
+    image: nginx
+    envFrom:
+    - secretRef:
+        name: db-secret
 ```
+
 
 ```bash
 kubectl apply -f secret-pod.yaml
