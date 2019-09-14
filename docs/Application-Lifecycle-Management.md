@@ -79,6 +79,16 @@ Perform the rolling update:
 ```bash
 kubectl set image deployments/kubeserve app=linuxacademycontent/kubeserve:v2 --v 6
 ```
+```bash
+kubectl rollout status deployment/myapp-deployment
+kubectl rollout history deployment/myapp-deployment
+kubectl set image deployment/myapp-deployment nginx=nginx:1.9.1
+kubectl rollout status deployment/myapp-deployment
+kubectl rollout history deployment/myapp-deployment
+kubectl rollout undo deployment/myapp-deployment
+kubectl describe deployment frontend |grep -i StrategyType:
+kubectl set image deployment/frontend simple-webapp=kodekloud/webapp-color:v3
+```
 
 Describe a certain ReplicaSet:
 
@@ -238,6 +248,23 @@ spec:
       configMap:
         name: appconfig
 ```
+* Using Configmap as environment 
+
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      envFrom:
+      - configMapRef:
+          name: special-config
+  restartPolicy: Never
+```
 
 Create the ConfigMap volume pod:
 
@@ -290,6 +317,30 @@ spec:
           key: cert
 ```
 Create the pod that has attached secret data:
+
+* Create Secrets
+
+```bash
+kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+```
+
+* Using secret as environment 
+
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: k8s.gcr.io/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      envFrom:
+      - configMapRef:
+          name: special-config
+  restartPolicy: Never
+```
 
 ```bash
 kubectl apply -f secret-pod.yaml
