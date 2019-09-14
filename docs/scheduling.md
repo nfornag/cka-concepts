@@ -545,6 +545,43 @@ The location of a systemd service scheduler pod:
 ```bash
 /var/log/kube-scheduler.log
 ```
+#### * Taint and Tolerations
+
+* Find the taints on particular Node
+```bash
+kubectl describe node node01
+```
+* Create taints for a node
+```bash
+kubectl taint nodes node01 spray=mortein:NoSchedule
+```
+* Schedule a pod tolerating taints
+
+```bash
+kubectl run --generator=run-pod/v1 bee --image=nginx --dry-run -o yaml > bee.yaml
+vi bee.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bee
+spec:
+  containers:
+  - image: nginx
+    name: bee
+  tolerations:
+  - key: spray
+    value: mortein
+    effect: NoSchedule
+    operator: Equal
+```
+
+* Remove taints
+```bash
+kubectl taint nodes master node-role.kubernetes.io/master:NoSchedule-
+```
+
+
+
 
 Helpful Links
 Verify the Desired Scheduler: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/#verifying-that-the-pods-were-scheduled-using-the-desired-schedulers
