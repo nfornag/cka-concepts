@@ -66,6 +66,11 @@ View the config file:
 ```bash
 cat ~/.kube/config
 ```
+```bash
+kubectl config view --kubeconfig my-kube-config
+kubectl config get-contexts research --kubeconfig my-kube-config -o wide
+kubectl config --kubeconfig=/root/my-kube-config use-context research
+```
 Set new credentials for your cluster:
 
 ```bash
