@@ -98,6 +98,11 @@ kubectl config set-credentials chad --username=chad --password=password
 ```
 Set the context for the cluster:
 
+* API Resources list
+```bash
+kubectl api-resources
+```
+
 ```bash
 kubectl config set-context kubernetes --cluster=kubernetes --user=chad --namespace=default
 ```
@@ -480,6 +485,22 @@ Tag an image in order to push it to a private registry:
 sudo docker tag busybox:1.28.4 podofminerva.azurecr.io/busybox:latest
 ```
 Push the image to your private registry:
+```bash
+kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password \
+  --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+```
+```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-reg
+spec:
+  containers:
+  - name: private-reg-container
+    image: <your-private-image>
+  imagePullSecrets:
+  - name: regcred
+```
 
 ```bash
 docker push podofminerva.azurecr.io/busybox:latest
