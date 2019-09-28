@@ -341,6 +341,7 @@ rules:
 ```bash
 kubectl get nodes -o json > /opt/outputs/nodes.json
 kubectl get node node01 -o json > /opt/outputs/node01.json
+kubectl get nodes -o=jsonpath='{.items[*].metadata.name}' > /opt/outputs/node_names.txt
 kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}' > /opt/outputs/nodes_os_x43kj56.txt
 kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.users[*].name}" > /opt/outputs/users.txt
 kubectl get pv --sort-by=.spec.capacity.storage
