@@ -4,6 +4,37 @@
 
 We already know Kubernetes will run pods and deployments, but what happens when you need to update or change the version of your application running inside of the Kubernetes cluster? That’s where rolling updates come in, allowing you to update the app image with zero downtime. In this lesson, we’ll go over a rolling update, how to roll back, and how to pause the update if things aren’t going well.
 
+The YAML for a POD
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: development
+  name: jekyll
+  labels:
+    run: jekyll
+spec:
+  containers:
+  - image: kodekloud/jekyll-serve
+    name: jekyll
+    volumeMounts:
+    - mountPath: /site
+      name: site
+  initContainers:
+  - name: copy-jekyll-site
+    image: kodekloud/jekyll
+    command:  [ "jekyll", "new", "/site" ]
+    volumeMounts:
+    - mountPath: /site
+      name: site
+  volumes:
+  - name: site
+    persistentVolumeClaim:
+      claimName: jekyll-site
+EOF
+```
 The YAML for a deployment:
 
 ```bash
@@ -496,3 +527,77 @@ kubectl describe statefulsets
 Helpful Links
 ReplicaSet 
 StatefulSets
+```bash
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-cluster
+spec:
+  serviceName: "redis-cluster-service"
+  podManagementPolicy: "Parallel"
+  replicas: 6
+  selector:
+    matchLabels:
+      app: redis-cluster
+  template:
+    metadata:
+      labels:
+        app: redis-cluster
+    spec:
+      containers:
+      - name: redis-cluster
+        image: redis:5.0.1-alpine
+        ports:
+        - containerPort: 6379
+          name: client
+        - containerPort: 16379
+          name: gossip
+        volumeMounts:
+        - name: conf
+          mountPath: /conf
+          readOnly: false
+        - name: data
+          mountPath: /data
+          readOnly: false
+        command: ["/conf/update-node.sh", "redis-server", "/conf/redis.conf"]
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+      volumes:
+      - name: conf
+        configMap:
+          name: redis-cluster-configmap
+          defaultMode: 0755
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+```bash
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster
+  labels:
+    app: redis-cluster
+spec:
+  ports:
+  - port: 6379
+    name: client
+	targetPort: 6379
+  - port: 16379
+    targetPort: 16379
+	name: client
+  clusterIP: None
+  selector:
+    app: redis-cluster
+```
+
