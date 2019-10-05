@@ -237,19 +237,18 @@ openssl req -new -key nyarlagadda.key -subj "/CN=nyarlagadda" -out nyarlagadda.c
 ::::::::::::::
 csr.yml
 ::::::::::::::
+cat <<EOF | kubectl apply -f -
 apiVersion: certificates.k8s.io/v1beta1
 kind: CertificateSigningRequest
 metadata:
-  name: nyarlagadda
+  name: my-svc.my-namespace
 spec:
-  groups:
-  - system:authenticated
+  request: $(cat nyarlagadda | base64 | tr -d '\n')
   usages:
   - digital signature
   - key encipherment
   - server auth
-  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1d6Q0NBVU1DQVFBd0ZqRVVNQklHQTFVRUF3d0xibmxoY214aFoyRmtaR0V3Z2dFaU1BMEdDU3FHU0liMwpEUUVCQVFVQUE0SUJEd0F3Z2dFS0
-FvSUJBUUMrYXk0eFNjazBBUURGbC9JUXNpdGpSaU0
+EOF
 
 kubectl certificate approve nyarlagadda
 
