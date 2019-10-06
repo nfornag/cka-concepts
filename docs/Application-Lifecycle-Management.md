@@ -7,6 +7,20 @@ We already know Kubernetes will run pods and deployments, but what happens when 
 The YAML for a POD
 
 ```bash
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
+```
+
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Pod
@@ -41,21 +55,24 @@ The YAML for a deployment:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kubeserve
+  name: nginx-deployment
+  labels:
+    app: nginx
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: kubeserve
+      app: nginx
   template:
     metadata:
-      name: kubeserve
       labels:
-        app: kubeserve
+        app: nginx
     spec:
       containers:
-      - image: linuxacademycontent/kubeserve:v1
-        name: app
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
 ```
 
 ```bash
@@ -67,18 +84,7 @@ Create a deployment with a record (for rollbacks):
 
 ```bash
 kubectl create -f kubeserve-deployment.yaml --record
-```
-
-Check the status of the rollout:
-
-```bash
 kubectl rollout status deployments kubeserve
-
-```
-
-Scale up your deployment by adding more replicas:
-
-```bash
 kubectl scale deployment kubeserve --replicas=5
 ```
 Expose the deployment and provide it a service:
@@ -123,12 +129,6 @@ kubectl set image deployment/frontend simple-webapp=kodekloud/webapp-color:v3
 ```
 
 Describe a certain ReplicaSet:
-
-```bash
-kubectl describe replicasets kubeserve-[hash]
-```
-Apply the rolling update to version 3 (buggy):
-
 ```bash
 kubectl set image deployment kubeserve app=linuxacademycontent/kubeserve:v3
 ```
@@ -136,16 +136,7 @@ Undo the rollout and roll back to the previous version:
 
 ```bash
 kubectl rollout undo deployments kubeserve
-```
-```bash
-Look at the rollout history:
-
-```bash
 kubectl rollout history deployment kubeserve
-```
-Roll back to a certain revision:
-
-```bash
 kubectl rollout undo deployment kubeserve --to-revision=2
 ```
 
@@ -174,44 +165,6 @@ Continuing from the last lesson, we will go through how Kubernetes will save you
 
 The YAML for a readiness probe:
 
-```bash
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: kubeserve
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: kubeserve
-  minReadySeconds: 10
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-    type: RollingUpdate
-  template:
-    metadata:
-      name: kubeserve
-      labels:
-        app: kubeserve
-    spec:
-      containers:
-      - image: linuxacademycontent/kubeserve:v3
-        name: app
-        readinessProbe:
-          periodSeconds: 1
-          httpGet:
-            path: /
-            port: 80
-
-```
-Apply the readiness probe:
-
-```bash
-kubectl apply -f kubeserve-deployment-readiness.yaml
-```
-View the rollout status:
 
 ```bash
 kubectl rollout status deployment kubeserve
