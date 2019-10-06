@@ -1,29 +1,24 @@
 
 
-
 ```bash
-kubectl run --generator=run-pod/v1 nginx-pod --image=nginx:alpine
-kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db 
-kubectl run --generator=run-pod/v1 temp-bus --image=redis:alpine -n finance
-kubectl run --generator=run-pod/v1 nginx --image=nginx
-kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
+kubectl auth can-i list secrets --namespace dev --as dave
 ```
 
 ```bash
-kubectl run --generator=deployment/v1beta1 hr-web-app --image=kodekloud/webapp-color --replicas=2
-kubectl run --generator=deployment/v1beta1 nginx --image=nginx --dry-run -o yaml
+kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db -n finance --dry-run -o yaml
+```
+
+```bash
 kubectl run --generator=deployment/v1beta1 nginx --image=nginx --dry-run --replicas=4 -o yaml
 kubectl run --generator=deployment/v1beta1 nginx --image=nginx --dry-run --replicas=4 -o yaml > nginx-deployment.yaml
 ```
 
 ```bash
-kubectl create deployment --image=kodekloud/webapp-color webapp 
-kubectl create deployment --image=kodekloud/webapp-color webapp --replicas=4 --dry-run -o yaml
-kubectl create deployment webapp --image=kodekloud/webapp-color. The scale the webapp to 3 using command kubectl scale deployment/webapp --replicas=3
+kubectl create deploy --image=kodekloud/webapp-color webapp  --dry-run -o yaml
+kubectl create deployment ngnix --image=nginx --dry-run -o yaml
 ```
 
 ```bash
-kubectl create deployment --image=nginx nginx
 kubectl set image deployment/clint-deployment clint=stephengride/multiclient:v5
 kubectl scale deployment/webapp --replicas=3
 kubectl scale rs new-replica-set --replicas=5
@@ -34,14 +29,6 @@ kubectl run --generator=deployment/apps.v1beta1
 kubectl run --generator=job/v1
 kubectl run --generator=cronjob/v1beta1
 kubectl run --generator=cronjob/v2alpha1
-```
-
-```bash
-kubectl expose pod redis --port=6379 --name redis-service
-kubectl expose deployment hr-web-app --type=NodePort --port=8080 --name=hr-web-app-service --dry-run -o yaml > webapp-service.yaml
-kubectl expose pod redis --port=6379 --name redis-service --dry-run -o yaml
-kubectl create service clusterip redis --tcp=6379:6379 --dry-run -o yaml
-kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run -o yaml
 ```
 
 ## Secrets
@@ -62,25 +49,9 @@ ps -aux|grep kubelet |grep yaml
 kubectl get nodes -o=jsonpath='{.items[*].metadata.name}' > /opt/outputs/node_names.txt
 ```
 
-```bash
-kubectl run --restart=Never --image=busybox:1.28.4 static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
-``` 
-```bash
-node01 $ ps -aux|grep kubelet |grep yaml
-root     18253  2.1  2.4 887200 98236 ?        Ssl  14:11   0:10 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml --cgroup-driver=cgroupfs --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --network-plugin=cni
-node01 $ vi /var/lib/kubelet/config.yaml
-node01 $ cd /etc/just-to-mess-with-you/
-node01 $ ls
-greenbox.yaml
-node01 $ rm greenbox.yaml
-```
-
 ### Rollouts##
 ```bash
 kubectl run --restart=Never --image=busybox:1.28.4 static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
-kubectl rollout status deployment/myapp-deployment
-kubectl set image deployment/myapp-deployment nginx=nginx:1.9.1
-kubectl set image deployment/frontend simple-webapp=kodekloud/webapp-color:v2
 kubectl rollout undo deployment/myapp-deployment
 ```
 
@@ -104,11 +75,6 @@ TLS
 openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text -noout
 openssl x509 -in  server.crt -text
 ```
-
-
-/etc/kubernetes/pki/users
-/etc/kubernetes/pki/users/aws-user/
-/etc/kubernetes/pki/users/dev-user/
 
 
 #####Security Contexts##
@@ -282,25 +248,6 @@ subjects:
 
 https://8gwifi.org/docs/kube-rbac.jsp
 ```
-```bash
-apiVersion: certificates.k8s.io/v1beta1
-kind: CertificateSigningRequest
-metadata:
-  name: akshay
-spec:
-  groups:
-  - system:authenticated
-  usages:
-  - digital signature
-  - key encipherment
-  - server auth
-  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZV3R6YUdGNU1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JS=
-```
-```bash
-kubectl config set-credentials user2 --client-certificate=user2.crt --client-key=user2.key
-kubectl config set-credentials nyarlagadda --client-certificate=/home/ynraju4/nyarlagadda.crt --client-key=/home/ynraju4/nyarlagadda.key
-kubectl config set-context test --cluster=hello-world.k8s.local --namespace=kube-system --user=nyarlagadda
-```
 
 ```bash
 kind: RoleBinding
@@ -328,9 +275,6 @@ rules:
 - apiGroups: ["", "extensions", "apps"]
   resources: ["deployments", "replicasets", "pods"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-
-
-
 ```
 
 
