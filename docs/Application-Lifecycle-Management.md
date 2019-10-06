@@ -75,11 +75,7 @@ Check the status of the rollout:
 kubectl rollout status deployments kubeserve
 
 ```
-View the ReplicaSets in your cluster:
 
-```bash
-kubectl get replicasets
-```
 Scale up your deployment by adding more replicas:
 
 ```bash
