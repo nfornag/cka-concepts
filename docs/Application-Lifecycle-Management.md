@@ -58,6 +58,11 @@ spec:
         name: app
 ```
 
+```bash
+nc -z -v -w 2 np-test-service 80
+kubectl run --generator=run-pod/v1 test-np --image=busybox:1.28 --rm -it -- sh 
+```
+
 Create a deployment with a record (for rollbacks):
 
 ```bash
