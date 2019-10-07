@@ -30,7 +30,10 @@ kubectl run --generator=job/v1
 kubectl run --generator=cronjob/v1beta1
 kubectl run --generator=cronjob/v2alpha1
 ```
-
+```bash
+command: ["/bin/bash", "-c"]
+args: ['cp -r /var/www/html/sites/ /data/; chown www-data:www-data /data/ -R']
+```
 ## Secrets
 
 ```bash
