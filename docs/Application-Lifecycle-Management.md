@@ -5,6 +5,24 @@
 We already know Kubernetes will run pods and deployments, but what happens when you need to update or change the version of your application running inside of the Kubernetes cluster? That’s where rolling updates come in, allowing you to update the app image with zero downtime. In this lesson, we’ll go over a rolling update, how to roll back, and how to pause the update if things aren’t going well.
 
 The YAML for a POD
+```bash
+alias k=kubectl
+alias ka='kubectl apply -f'
+alias kg='kubectl get'
+alias kd='kubectl describe'
+alias kgp='kubectl get po'
+alias kgr='kubectl get roles'
+alias kgcr='kubectl get clusterroles'
+alias kgrb='kubectl get rolebindings'
+alias kgcrb='kubectl get clusterrolebinding'
+alias kgcm='kubectl get configmaps'
+alias kgsc='kubectl get secrets'
+alias kgd='kubectl get deployments'
+alias kga='kubectl get all'
+alias kcgc='kubectl config get-contexts'
+alias kcuc='kubectl config use-context'
+```
+
 
 ```bash
 apiVersion: v1
